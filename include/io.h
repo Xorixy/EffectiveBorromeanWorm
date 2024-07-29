@@ -1,5 +1,5 @@
 #pragma once
-#include "io"
+#include "io.h"
 #include <h5pp/h5pp.h>
 #include "settings.h"
 #include <vector>
@@ -7,5 +7,6 @@
 
 namespace io {
     void test();
-    void loadSettings(std::string settings_path);
+    void load_settings(std::string settings_path);
+    void save_settings(std::string settings_path);
 }

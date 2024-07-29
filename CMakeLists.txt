@@ -28,6 +28,9 @@ add_executable(EFFBORR
         source/rnd.cpp
         source/cli.cpp
         source/io.cpp
+        source/log.cpp
+        source/sim.cpp
+        source/state.cpp
 )
 
 target_include_directories(EFFBORR PRIVATE source)

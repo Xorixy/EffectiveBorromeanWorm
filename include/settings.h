@@ -7,10 +7,15 @@ namespace settings {
         inline auto seed         = 0ul;
     }
 
+    namespace worm {
+        inline double p_move = 1.0;
+        inline double p_type = 1.0;
+    }
+
     namespace sim {
         //System sizes
-        inline int size_x = 1;
-        inline int size_y = 1;
+        inline int size_x = 5;
+        inline int size_y = 5;
 
         //Number of simulation/thermalization steps
         inline long long unsigned int n_steps = 10;
