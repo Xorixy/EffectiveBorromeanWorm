@@ -1,7 +1,7 @@
 //
 // Created by david on 2024-02-28.
 //
-#include "rnd.h"
+#include "../include/rnd.h"
 
 void rnd::seed(std::optional<uint64_t> number) {
     if(number.has_value()) {

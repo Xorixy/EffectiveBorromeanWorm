@@ -11,10 +11,8 @@
       "hidden": true,
       "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
-        "CMT_ENABLE_OPENMP": "TRUE",
-        "CMT_ENABLE_MPI": "TRUE",
-        "CMT_BUILD_TESTS": "TRUE",
-        "CMT_BUILD_BENCH": "TRUE",
+        "CMT_BUILD_TESTS": "FALSE",
+        "CMT_BUILD_BENCH": "FALSE",
         "CMT_BUILD_EXAMPLES": "TRUE",
         "CMT_CMAKE_DEBUG": "TRUE",
         "CMAKE_CXX_STANDARD": "20",
