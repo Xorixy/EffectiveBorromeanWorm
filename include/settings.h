@@ -10,6 +10,8 @@ namespace settings {
     namespace worm {
         inline double p_move = 1.0;
         inline double p_type = 1.0;
+        inline double single_to_counter_ratio = 1.0;
+        inline double counter_to_single_ratio = 1.0;
     }
 
     namespace sim {
@@ -30,7 +32,7 @@ namespace settings {
         //Winding numbers
         inline bool windings = false;
 
-        //Correlations
+
         //Correlations are saved averaged over an annulus
         //Outer radius of annulus is always system size/2
         //Inner radius equals outer radius * ( 1 - annulus_size)
@@ -48,6 +50,8 @@ namespace settings {
 
     namespace io {
         inline std::string filename = "simulation.h5";
+        //Probably want to set it to true in the final code.
+        inline bool replace_file = true;
     }
 
     namespace log {

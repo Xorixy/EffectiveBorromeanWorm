@@ -9,7 +9,9 @@ int cli::parse(int argc, char *argv[]) {
     app.allow_extras(false);
 
     std::string settings_path = "settings.h5";
+    bool save_settings_no_run = false;
     bool save_settings = false;
+    bool debug = false;
 
     app.add_option("-n, --n_steps"          , settings::sim::n_steps, "Number of simulation steps");
     app.add_option("-t, --n_therm"          , settings::sim::n_therm, "Number of thermalization steps");
@@ -27,28 +29,35 @@ int cli::parse(int argc, char *argv[]) {
     app.add_option("-r, --seed"              , settings::random::seed            , "Random number seed");
     app.add_option("-o, --filename"          , settings::io::filename     , "Path to the output file");
     app.add_option("-l, --loglevel"          , settings::log::level              , "Verbosity 0:high --> 6:off")->check(CLI::Range(0,6));
-    app.add_flag("--save_settings", save_settings, "Saves the sim settings given here to the file corresponding to settings_path. Does not run any simulations.");
+    app.add_flag("--save_settings_no_run", save_settings_no_run, "Saves the sim settings given here to the file corresponding to settings_path. Does not run simulation. Overrides debug.");
+    app.add_flag("--save_settings_run", save_settings, "Saves the sim settings given here to the file corresponding to settings_path.");
+    app.add_flag("--debug"          , debug, "Enters debug mode with the settings from the settings file.");
 
     /* clang-format on */
     CLI11_PARSE(app, argc, argv);
 
-    if (save_settings) {
-
-
+    if (save_settings || save_settings_no_run) {
         io::save_settings(settings_path);
-        logger::log = spdlog::stdout_color_mt("EffBor", spdlog::color_mode::always);
-        logger::log->set_level(static_cast<spdlog::level::level_enum>(0));
         logger::log->info("Saving sim parameters in \"{}\"", settings_path);
-        logger::print_params();
-        return 1;
+        if (save_settings_no_run) {
+            logger::print_params();
+            return 1;
+        }
     }
 
     io::load_settings(settings_path);
 
-    logger::log = spdlog::stdout_color_mt("EffBor", spdlog::color_mode::always);
-    logger::log->set_level(static_cast<spdlog::level::level_enum>(settings::log::level));
+    settings::worm::single_to_counter_ratio = settings::sim::counter_weight/settings::sim::single_weight;
+    settings::worm::counter_to_single_ratio = settings::sim::single_weight/settings::sim::counter_weight;
+    if (settings::worm::counter_to_single_ratio > 1.0) settings::worm::counter_to_single_ratio = 1.0;
+    if (settings::worm::single_to_counter_ratio > 1.0) settings::worm::single_to_counter_ratio = 1.0;
 
     logger::print_params();
+
+    if (debug) return 2;
+
+    if (settings::io::replace_file) io::outfile = h5pp::File(settings::io::filename, h5pp::FileAccess::REPLACE);
+    else io::outfile = h5pp::File(settings::io::filename, h5pp::FileAccess::COLLISION_FAIL);
 
     return 0;
 }

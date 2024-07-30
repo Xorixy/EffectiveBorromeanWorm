@@ -4,9 +4,12 @@
 #include <cmath>
 #include "uint128.h"
 #include "../include/rnd.h"
-#include "../include/sim.h"
+#include "../include/exceptions.h"
+#include <fmt/core.h>
+#include <string>
 
-namespace sim::state {
+
+namespace state {
     using Point = int;
     using Coord = std::pair<int, int>;
     Point point_id(const Coord & coord);
@@ -49,18 +52,23 @@ namespace sim::state {
         private:
             Lattice m_lattice;
             std::vector<std::vector<std::vector<int>>> m_bonds;
-            std::vector<std::vector<long long unsigned int>> m_winding_numbers;
+            std::vector<std::vector<long long int>> m_winding_numbers;
             Point worm_head;
             Point worm_tail;
             int worm_color_forward;
             int worm_color_backward;
         public:
             State();
-            void try_to_add_bond(Point p, int dir);
-            void move_worm();
-            Point get_worm_head();
-            Point get_worm_tail();
+            void try_to_add_bond(int dir);
+            void try_to_move_worm();
+            [[nodiscard]] Point get_worm_head() const;
+            [[nodiscard]] Point get_worm_tail() const;
             void relocate_worm();
             void recolor_worm();
+            void print_state();
+            long long int get_winding_diff_square();
+            long long int get_winding_sum_square();
+            Coord get_coords(Point p);
+            void print_windings();
     };
 }

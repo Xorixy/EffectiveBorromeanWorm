@@ -30,4 +30,5 @@ namespace rnd {
         std::normal_distribution<T> dist(mu, sigma);
         return dist(internal::prng);
     }
+
 }
