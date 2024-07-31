@@ -40,7 +40,7 @@ void sim::Simulation::run() {
         if (settings::save::time_series && i_iter % settings::save::save_interval == 0) {
             //fmt::print("Saving slice\n");
             try {
-                io::save_slice(save, std::to_string(settings::random::seed) + "/" + std::to_string(i_iter) + "/");
+                io::save_slice(save, std::to_string(i_iter) + "/");
             } catch (std::exception& e) {
                 logger::log->info("Error {}\n", e.what());
                 return;
@@ -48,7 +48,7 @@ void sim::Simulation::run() {
         }
     }
     if (!settings::save::time_series || i_iter % settings::save::save_interval != 0) {
-        io::save_slice(save, std::to_string(settings::random::seed) + "/" + std::to_string(i_iter) + "/");
+        io::save_slice(save, std::to_string(i_iter) + "/");
     }
 
     elapsed = std::chrono::steady_clock::now() - start_time;
