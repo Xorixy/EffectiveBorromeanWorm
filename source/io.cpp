@@ -1,6 +1,5 @@
 #include "../include/io.h"
 
-
 void io::load_settings() {
     const h5pp::File s_file(settings::io::settings_path, h5pp::FileAccess::READONLY);
     s_file.readDataset<int>(settings::sim::size_x, "settings/sim/size_x");
@@ -31,9 +30,11 @@ void io::save_settings() {
     s_file.writeDataset<double>(settings::save::annulus_size, "settings/save/annulus_size");
     s_file.writeDataset<int>(settings::save::save_interval, "settings/save/save_interval");
     s_file.writeDataset<bool>(settings::save::time_series, "settings/save/time_series");
-    long long unsigned int x = 0;
-    x--;
-    s_file.writeDataset<long long unsigned int>(x, "settings/sim/base_minus_one");
+}
+
+void io::save_base() {
+    h5pp::File s_file(settings::io::settings_path, h5pp::FileAccess::READWRITE);
+    s_file.writeDataset<long long unsigned int>(ULLONG_MAX, "settings/sim/base_minus_one");
 }
 
 void io::save_annulus_size(const int annulus_size) {

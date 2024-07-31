@@ -43,6 +43,8 @@ int cli::parse(int argc, char *argv[]) {
         }
     }
 
+    if (settings::random::seed == 0) io::save_base();
+
     io::load_settings();
 
     settings::worm::single_to_counter_ratio = settings::sim::counter_weight/settings::sim::single_weight;
