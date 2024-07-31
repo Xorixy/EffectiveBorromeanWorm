@@ -8,7 +8,6 @@ int cli::parse(int argc, char *argv[]) {
     app.option_defaults()->always_capture_default();
     app.allow_extras(false);
 
-    std::string settings_path = "settings.h5";
     bool save_settings_no_run = false;
     bool save_settings = false;
     bool debug = false;
@@ -24,7 +23,7 @@ int cli::parse(int argc, char *argv[]) {
     app.add_flag  ("-m, --time_series"        , settings::save::time_series, "Save as time series");
     app.add_option("-a, --annulus_size"      , settings::save::annulus_size, "Sets size of the annulus for saving correlations. Outer radius of annulus is always system size/2, inner radius equals outer radius * ( 1 - annulus_size)");
     app.add_option("-i, --save_interval"       , settings::save::save_interval, "Interval (in steps) for saving in time series");
-    app.add_option("-s, --settings_file", settings_path, "Path to an h5 file containing the program settings");
+    app.add_option("-s, --settings_file", settings::io::settings_path, "Path to an h5 file containing the program settings");
     app.add_option("-r, --seed"              , settings::random::seed            , "Random number seed");
     app.add_option("-o, --filename"          , settings::io::filename     , "Path to the output file");
     app.add_option("-l, --loglevel"          , settings::log::level              , "Verbosity 0:high --> 6:off")->check(CLI::Range(0,6));
@@ -36,15 +35,15 @@ int cli::parse(int argc, char *argv[]) {
     CLI11_PARSE(app, argc, argv);
 
     if (save_settings || save_settings_no_run) {
-        io::save_settings(settings_path);
-        logger::log->info("Saving sim parameters in \"{}\"", settings_path);
+        io::save_settings();
+        logger::log->info("Saving sim parameters in \"{}\"", settings::io::settings_path);
         if (save_settings_no_run) {
             logger::print_params();
             return 1;
         }
     }
 
-    io::load_settings(settings_path);
+    io::load_settings();
 
     settings::worm::single_to_counter_ratio = settings::sim::counter_weight/settings::sim::single_weight;
     settings::worm::counter_to_single_ratio = settings::sim::single_weight/settings::sim::counter_weight;

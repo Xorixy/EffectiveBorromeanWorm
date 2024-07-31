@@ -47,7 +47,8 @@ namespace settings {
 
     namespace io {
         inline std::string filename = "simulation.h5";
-        //Probably want to set it to true in the final code.
+        inline std::string settings_path = "settings.h5";
+        //Probably want to set it to false in the final code.
         inline bool replace_file = true;
     }
 

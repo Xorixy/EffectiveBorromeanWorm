@@ -1,8 +1,8 @@
 #include "../include/io.h"
 
 
-void io::load_settings(const std::string& settings_path) {
-    const h5pp::File s_file(settings_path, h5pp::FileAccess::READONLY);
+void io::load_settings() {
+    const h5pp::File s_file(settings::io::settings_path, h5pp::FileAccess::READONLY);
     s_file.readDataset<int>(settings::sim::size_x, "settings/sim/size_x");
     s_file.readDataset<int>(settings::sim::size_y, "settings/sim/size_y");
     s_file.readDataset<long long unsigned int>(settings::sim::n_steps, "settings/sim/n_steps");
@@ -16,10 +16,10 @@ void io::load_settings(const std::string& settings_path) {
     s_file.readDataset<bool>(settings::save::time_series, "settings/save/time_series");
 }
 
-void io::save_settings(const std::string& settings_path) {
+void io::save_settings() {
     h5pp::File s_file;
-    if (settings::io::replace_file) s_file = h5pp::File(settings_path, h5pp::FileAccess::REPLACE);
-    else s_file = h5pp::File(settings_path, h5pp::FileAccess::COLLISION_FAIL);
+    if (settings::io::replace_file) s_file = h5pp::File(settings::io::settings_path, h5pp::FileAccess::REPLACE);
+    else s_file = h5pp::File(settings::io::settings_path, h5pp::FileAccess::COLLISION_FAIL);
     s_file.writeDataset<int>(settings::sim::size_x, "settings/sim/size_x");
     s_file.writeDataset<int>(settings::sim::size_y, "settings/sim/size_y");
     s_file.writeDataset<long long unsigned int>(settings::sim::n_steps, "settings/sim/n_steps");
@@ -34,7 +34,8 @@ void io::save_settings(const std::string& settings_path) {
 }
 
 void io::save_annulus_size(const int annulus_size) {
-    io::outfile.writeDataset(annulus_size, "/annulus_size");
+    h5pp::File s_file(settings::io::settings_path, h5pp::FileAccess::READWRITE);
+    s_file.writeDataset(annulus_size, "settings/sim/annulus_area");
 }
 
 

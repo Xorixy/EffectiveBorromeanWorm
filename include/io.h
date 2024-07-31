@@ -6,16 +6,16 @@
 #include "sim.h"
 
 namespace sim {
-    class SaveStruct;
+    struct SaveStruct;
 }
 
 namespace io {
     inline h5pp::File outfile;
 
-    void load_settings(const std::string& settings_path);
-    void save_settings(const std::string& settings_path);
+    void load_settings();
+    void save_settings();
 
     void save_slice(sim::SaveStruct& save, const std::string& prefix);
 
-    void save_annulus_size(const int annulus_size);
+    void save_annulus_size(int annulus_size);
 }

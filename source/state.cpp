@@ -86,7 +86,7 @@ state::Annulus::Annulus()
             }
         }
     }
-    io::save_annulus_size(m_size);
+    if (settings::random::seed == 0) io::save_annulus_size(m_size);
 }
 
 bool state::Annulus::contains(const Coord& r) {
