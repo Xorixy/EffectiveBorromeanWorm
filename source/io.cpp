@@ -43,11 +43,15 @@ void io::save_annulus_size(const int annulus_size) {
 }
 
 
-void io::save_slice(sim::SaveStruct& save, const std::string& prefix) {
-    io::outfile.writeDataset<long long unsigned int>(save.windings_difference_squared.big, prefix + "/windings_diff_squared/big");
-    io::outfile.writeDataset<long long unsigned int>(save.windings_difference_squared.small, prefix + "/windings_diff_squared//small");
-    io::outfile.writeDataset<long long unsigned int>(save.windings_sum_squared.big, prefix + "/windings_sum_squared/big");
-    io::outfile.writeDataset<long long unsigned int>(save.windings_sum_squared.small, prefix + "/windings_sum_squared//small");
+void io::save_slice(const sim::SaveStruct& save, const std::string& prefix) {
+    io::outfile.writeDataset<long long unsigned int>(save.windings_difference_squared_x.big, prefix + "/windings_diff_squared_x/big");
+    io::outfile.writeDataset<long long unsigned int>(save.windings_difference_squared_x.small, prefix + "/windings_diff_squared_x/small");
+    io::outfile.writeDataset<long long unsigned int>(save.windings_difference_squared_y.big, prefix + "/windings_diff_squared_y/big");
+    io::outfile.writeDataset<long long unsigned int>(save.windings_difference_squared_y.small, prefix + "/windings_diff_squared_y/small");
+    io::outfile.writeDataset<long long unsigned int>(save.windings_sum_squared_x.big, prefix + "/windings_sum_squared_x/big");
+    io::outfile.writeDataset<long long unsigned int>(save.windings_sum_squared_x.small, prefix + "/windings_sum_squared_x/small");
+    io::outfile.writeDataset<long long unsigned int>(save.windings_sum_squared_y.big, prefix + "/windings_sum_squared_y/big");
+    io::outfile.writeDataset<long long unsigned int>(save.windings_sum_squared_y.small, prefix + "/windings_sum_squared_y/small");
     io::outfile.writeDataset<long long unsigned int>(save.partition_function, prefix + "/partition_function");
     io::outfile.writeDataset<long long unsigned int>(save.annulus_sum, prefix + "/annulus_sum");
 }

@@ -354,14 +354,14 @@ void state::State::print_state() {
     }
 }
 
-long long state::State::get_winding_diff_square() {
-    return (m_winding_numbers.at(0).at(0) - m_winding_numbers.at(1).at(0))*(m_winding_numbers.at(0).at(0) - m_winding_numbers.at(1).at(0)) +
-           (m_winding_numbers.at(0).at(1) - m_winding_numbers.at(1).at(1))*(m_winding_numbers.at(0).at(1) - m_winding_numbers.at(1).at(1));
+std::pair<long long, long long> state::State::get_winding_diff_square() {
+    return {(m_winding_numbers.at(0).at(0) - m_winding_numbers.at(1).at(0))*(m_winding_numbers.at(0).at(0) - m_winding_numbers.at(1).at(0)),
+           (m_winding_numbers.at(0).at(1) - m_winding_numbers.at(1).at(1))*(m_winding_numbers.at(0).at(1) - m_winding_numbers.at(1).at(1))};
 }
 
-long long state::State::get_winding_sum_square() {
-    return (m_winding_numbers.at(0).at(0) + m_winding_numbers.at(1).at(0))*(m_winding_numbers.at(0).at(0) + m_winding_numbers.at(1).at(0)) +
-           (m_winding_numbers.at(0).at(1) + m_winding_numbers.at(1).at(1))*(m_winding_numbers.at(0).at(1) + m_winding_numbers.at(1).at(1));
+std::pair<long long, long long> state::State::get_winding_sum_square() {
+    return {(m_winding_numbers.at(0).at(0) + m_winding_numbers.at(1).at(0))*(m_winding_numbers.at(0).at(0) + m_winding_numbers.at(1).at(0)),
+           (m_winding_numbers.at(0).at(1) + m_winding_numbers.at(1).at(1))*(m_winding_numbers.at(0).at(1) + m_winding_numbers.at(1).at(1))};
 }
 
 Coord state::State::get_coords(state::Point p) {

@@ -66,8 +66,8 @@ namespace state {
             void relocate_worm();
             void recolor_worm();
             void print_state();
-            long long int get_winding_diff_square();
-            long long int get_winding_sum_square();
+            std::pair<long long, long long> get_winding_diff_square();
+            std::pair<long long, long long> get_winding_sum_square();
             Coord get_coords(Point p);
             void print_windings();
     };

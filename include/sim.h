@@ -10,8 +10,10 @@
 namespace sim {
 
     struct SaveStruct {
-        simple_uint128 windings_sum_squared { 0 };
-        simple_uint128 windings_difference_squared { 0 };
+        simple_uint128 windings_sum_squared_x { 0 };
+        simple_uint128 windings_sum_squared_y { 0 };
+        simple_uint128 windings_difference_squared_x { 0 };
+        simple_uint128 windings_difference_squared_y { 0 };
         long long unsigned int partition_function { 0 };
         long long unsigned int annulus_sum { 0 };
     };

@@ -61,8 +61,12 @@ void sim::Simulation::extract_state_data() {
     if (worm_head == worm_tail) {
         save.partition_function++;
         if (settings::save::windings) {
-            save.windings_difference_squared.add(m_state.get_winding_diff_square());
-            save.windings_sum_squared.add(m_state.get_winding_sum_square());
+            auto [wind_diff_x, wind_diff_y] = m_state.get_winding_diff_square();
+            auto [wind_sum_x , wind_sum_y ] = m_state.get_winding_sum_square();
+            save.windings_difference_squared_x.add(wind_diff_x);
+            save.windings_difference_squared_y.add(wind_diff_y);
+            save.windings_sum_squared_x.add(wind_sum_x);
+            save.windings_sum_squared_y.add(wind_sum_y);
         }
     }
     else if (settings::save::correlations && m_annulus.contains(m_state.get_coords(worm_head), m_state.get_coords(worm_tail)))
