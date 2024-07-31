@@ -39,7 +39,12 @@ void sim::Simulation::run() {
         */
         if (settings::save::time_series && i_iter % settings::save::save_interval == 0) {
             //fmt::print("Saving slice\n");
-            io::save_slice(save, std::to_string(settings::random::seed) + "/" + std::to_string(i_iter) + "/");
+            try {
+                io::save_slice(save, std::to_string(settings::random::seed) + "/" + std::to_string(i_iter) + "/");
+            } catch (std::exception& e) {
+                logger::log->info("Error {}\n", e.what());
+                return;
+            }
         }
     }
     if (!settings::save::time_series || i_iter % settings::save::save_interval != 0) {
@@ -51,13 +56,15 @@ void sim::Simulation::run() {
 }
 
 void sim::Simulation::extract_state_data() {
-    if (settings::save::windings) {
-        save.windings_difference_squared.add(m_state.get_winding_diff_square());
-        save.windings_sum_squared.add(m_state.get_winding_sum_square());
+    const int worm_head = m_state.get_worm_head();
+    const int worm_tail = m_state.get_worm_tail();
+    if (worm_head == worm_tail) {
+        save.partition_function++;
+        if (settings::save::windings) {
+            save.windings_difference_squared.add(m_state.get_winding_diff_square());
+            save.windings_sum_squared.add(m_state.get_winding_sum_square());
+        }
     }
-    int worm_head = m_state.get_worm_head();
-    int worm_tail = m_state.get_worm_tail();
-    if (worm_head == worm_tail) save.partition_function++;
     else if (settings::save::correlations && m_annulus.contains(m_state.get_coords(worm_head), m_state.get_coords(worm_tail)))
         save.annulus_sum++;
 }
