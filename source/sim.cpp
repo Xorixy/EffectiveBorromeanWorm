@@ -2,12 +2,14 @@
 
 sim::Simulation::Simulation() = default;
 
+/*
 void sim::Simulation::print_save_data() {
     fmt::print("Windings difference squared : {} {}\n", save.windings_difference_squared.big, save.windings_difference_squared.small);
     fmt::print("Windings sum squared : {} {}\n", save.windings_sum_squared.big, save.windings_sum_squared.small);
     fmt::print("Partition function: {}\n", save.partition_function);
     fmt::print("Annulus sum: {}\n", save.annulus_sum);
 }
+*/
 
 void sim::Simulation::run() {
     logger::log->info("Done\n");
