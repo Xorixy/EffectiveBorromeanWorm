@@ -33,6 +33,11 @@ void io::save_settings(const std::string& settings_path) {
     s_file.writeDataset<bool>(settings::save::time_series, "settings/save/time_series");
 }
 
+void io::save_annulus_size(const int annulus_size) {
+    io::outfile.writeDataset(annulus_size, "/annulus_size");
+}
+
+
 void io::save_slice(sim::SaveStruct& save, const std::string& prefix) {
     io::outfile.writeDataset<long long unsigned int>(save.windings_difference_squared.big, prefix + "/windings_diff_squared/big");
     io::outfile.writeDataset<long long unsigned int>(save.windings_difference_squared.small, prefix + "/windings_diff_squared//small");

@@ -1,6 +1,5 @@
 #include "../include/state.h"
-
-
+#include "../include/io.h"
 
 using Point = state::Point;
 using Coord = state::Coord;
@@ -87,6 +86,7 @@ state::Annulus::Annulus()
             }
         }
     }
+    io::save_annulus_size(m_size);
 }
 
 bool state::Annulus::contains(const Coord& r) {

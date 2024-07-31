@@ -16,4 +16,6 @@ namespace io {
     void save_settings(const std::string& settings_path);
 
     void save_slice(sim::SaveStruct& save, const std::string& prefix);
+
+    void save_annulus_size(const int annulus_size);
 }
