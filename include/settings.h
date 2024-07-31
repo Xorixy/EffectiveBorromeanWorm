@@ -43,9 +43,6 @@ namespace settings {
         //and at what step interval the time series should be saved
         inline bool time_series = false;
         inline int save_interval = 10000;
-
-        //Whether to save the final bond configuration
-        inline bool bond_config = false;
     }
 
     namespace io {

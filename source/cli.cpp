@@ -22,7 +22,6 @@ int cli::parse(int argc, char *argv[]) {
     app.add_flag  ("-w, --windings"           , settings::save::windings, "Save windings");
     app.add_flag  ("-g, --correlations"       , settings::save::correlations, "Save correlations");
     app.add_flag  ("-m, --time_series"        , settings::save::time_series, "Save as time series");
-    app.add_flag  ("-b, --bond_config"        , settings::save::bond_config, "Save final bond configuration");
     app.add_option("-a, --annulus_size"      , settings::save::annulus_size, "Sets size of the annulus for saving correlations. Outer radius of annulus is always system size/2, inner radius equals outer radius * ( 1 - annulus_size)");
     app.add_option("-i, --save_interval"       , settings::save::save_interval, "Interval (in steps) for saving in time series");
     app.add_option("-s, --settings_file", settings_path, "Path to an h5 file containing the program settings");

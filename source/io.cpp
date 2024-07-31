@@ -11,7 +11,6 @@ void io::load_settings(const std::string& settings_path) {
     s_file.readDataset<double>(settings::sim::counter_weight, "settings/sim/counter_weight");
     s_file.readDataset<bool>(settings::save::windings, "settings/save/windings");
     s_file.readDataset<bool>(settings::save::correlations, "settings/save/correlations");
-    s_file.readDataset<bool>(settings::save::bond_config, "settings/save/bond_config");
     s_file.readDataset<double>(settings::save::annulus_size, "settings/save/annulus_size");
     s_file.readDataset<int>(settings::save::save_interval, "settings/save/save_interval");
     s_file.readDataset<bool>(settings::save::time_series, "settings/save/time_series");
@@ -29,7 +28,6 @@ void io::save_settings(const std::string& settings_path) {
     s_file.writeDataset<double>(settings::sim::counter_weight, "settings/sim/counter_weight");
     s_file.writeDataset<bool>(settings::save::windings, "settings/save/windings");
     s_file.writeDataset<bool>(settings::save::correlations, "settings/save/correlations");
-    s_file.writeDataset<bool>(settings::save::bond_config, "settings/save/bond_config");
     s_file.writeDataset<double>(settings::save::annulus_size, "settings/save/annulus_size");
     s_file.writeDataset<int>(settings::save::save_interval, "settings/save/save_interval");
     s_file.writeDataset<bool>(settings::save::time_series, "settings/save/time_series");

@@ -12,7 +12,6 @@ void logger::print_params() {
     logger::log->info("annulus_size     : {}", settings::save::annulus_size);
     logger::log->info("time_series      : {}", settings::save::time_series);
     logger::log->info("save_interval    : {}", settings::save::save_interval);
-    logger::log->info("bond_config      : {}", settings::save::bond_config);
     logger::log->info("seed             : {}", settings::random::seed);
     logger::log->info("filename         : {}", settings::io::filename);
 }
