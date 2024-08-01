@@ -52,44 +52,42 @@ else:
 
 #subprocess.run(['build/release-conan/CMT', filename]) 
 
+for i in range(len(sim_params.size)):
+    os.mkdir(foldername + "/" + str(i))
+    settings_path = foldername + "/" + str(i) + '/' + sim_params.set_name + '.h5'
+    add_settings(settings_path, sim_params, sim_params.windings[i], sim_params.correlations[i], 
+                sim_params.annulus_size[i], sim_params.save_interval[i], sim_params.time_series[i],
+                sim_params.size_x[i], sim_params.size_y[i], sim_params.n_steps[i], 
+                sim_params.n_therm[i], sim_params.single_weight[i], sim_params.counter_weight[i])
+
 if  os.environ['LOCATION'] == 'landau':
     for i in range(len(sim_params.size)):
-        os.mkdir(foldername + "/" + str(i))
         settings_path = foldername + "/" + str(i) + '/' + sim_params.set_name + '.h5'
-        add_settings(settings_path, sim_params, sim_params.windings[i], sim_params.correlations[i], 
-                     sim_params.annulus_size[i], sim_params.save_interval[i], sim_params.time_series[i],
-                     sim_params.size_x[i], sim_params.size_y[i], sim_params.n_steps[i], 
-                     sim_params.n_therm[i], sim_params.single_weight[i], sim_params.counter_weight[i])
         for j in range(sim_params.n_samples):
             filename = foldername + "/" + str(i) + '/' + str(j) + '.h5'
             subprocess.run(['build/release-conan/EFFBORR', '-o', filename, '-s', settings_path, '-r', str(j)]) 
 
 elif os.environ['LOCATION'] == 'kraken':
-    header_list = [ "#!/bin/bash -l",
+    comm_list = [ "#!/bin/bash -l",
                     "#SBATCH -J " + sim_params.sim_name,
                     "#SBATCH --mem-per-cpu=" + sim_params.mem_per_cpu,
                     "#SBATCH --time=" + sim_params.time_limit,
                     "#SBATCH --clusters=kraken",
-                    "#SBATCH --partition=all"                  
+                    "#SBATCH --partition=all", 
+                    "#SBATCH --array=0-" + str(len(sim_params.size) * sim_params.n_samples),
+                    "A=$((SLURM_ARRAY_TASK_ID/" + str(sim_params.n_samples),
+                    "B=$((SLURM_ARRAY_TASK_ID%" + str(sim_params.n_samples),
+                    ("./build/release-conan/EFFBORR -o " + foldername + '/$A/$B.h5 -s ' 
+                     + foldername + '/A/' + sim_params.set_name + '.h5 -r $B')
                     ]
-    run_list = []
-    for i in range(len(sim_params.size)):
-        os.mkdir(foldername + "/" + str(i))
-        settings_path = foldername + "/" + str(i) + '/' + sim_params.set_name + '.h5'
-        add_settings(settings_path, sim_params, sim_params.windings[i], sim_params.correlations[i], 
-                     sim_params.annulus_size[i], sim_params.save_interval[i], sim_params.time_series[i],
-                     sim_params.size_x[i], sim_params.size_y[i], sim_params.n_steps[i], 
-                     sim_params.n_therm[i], sim_params.single_weight[i], sim_params.counter_weight[i])
-        for j in range(sim_params.n_samples):
-            filename = foldername + "/" + str(i) + '/' + str(j) + '.h5'        
-            run_list.append("srun build/release-conan/EFFBORR -o " + filename + ' -s ' + settings_path + ' -r ' + str(j))
+
             
 
 
     # Writing the runfile
     run_file = open(f"srunfile.sh", "w")
     #printstr = f"echo \"\n===========\nThis is job number {i}, {j}\"\n"
-    run_file.writelines(["\n".join(header_list), "\n\n", "\n".join(run_list)])
+    run_file.writelines("\n".join(comm_list))
     run_file.close()
 
     # Submitting runfile
