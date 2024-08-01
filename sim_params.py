@@ -1,12 +1,12 @@
 import numpy as np
 
-sim_name = 'test_l'
+sim_name = 'test_l1'
 set_name = 'settings'
 
 
 single_weight_arr = np.linspace(0.4, 0.6, 20)
-counter_weight_arr = np.linspace(0.5, 0.5, 2)
-size_arr = np.linspace(50, 50, 1)
+counter_weight_arr = np.linspace(0.5, 0.5, 1)
+size_arr = np.linspace(40, 40, 1)
 
 (single_weight_t, 
  counter_weight_t, 
@@ -21,9 +21,12 @@ counter_weight = counter_weight_t.flatten()
 size_x = size
 size_y = size
 
-n_samples = 6
-n_steps = 10000000 * np.ones_like(size)
-n_therm = 10000000 * np.ones_like(size)
+mem_per_cpu = '500'
+time_limit = '00:10:00'
+
+n_samples = 4
+n_steps = 100000000 * np.ones_like(size)
+n_therm = 100000000 * np.ones_like(size)
 
 #size_x = 5
 #size_y = 5
