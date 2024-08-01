@@ -82,7 +82,7 @@ elif os.environ['LOCATION'] == 'kraken':
                      sim_params.n_therm[i], sim_params.single_weight[i], sim_params.counter_weight[i])
         for j in range(sim_params.n_samples):
             filename = foldername + "/" + str(i) + '/' + str(j) + '.h5'        
-            run_list.append("srun build/release-conan/EFFBORR -o " + filename + ' -s ' + settings_path + ' -r ' + str(j)])
+            run_list.append("srun build/release-conan/EFFBORR -o " + filename + ' -s ' + settings_path + ' -r ' + str(j))
             
 
 
