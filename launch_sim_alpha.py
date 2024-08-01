@@ -72,6 +72,8 @@ elif os.environ['LOCATION'] == 'kraken':
                     "#SBATCH -J " + sim_params.sim_name,
                     "#SBATCH --mem-per-cpu=" + sim_params.mem_per_cpu,
                     "#SBATCH --time=" + sim_params.time_limit,
+                    "#SBATCH --output=logs/"+sim_params.sim_name+".out",
+                    "#SBATCH --error=logs/"+sim_params.sim_name+".err",
                     "#SBATCH --clusters=kraken",
                     "#SBATCH --partition=all", 
                     "#SBATCH --array=0-" + str(len(sim_params.size) * sim_params.n_samples),
