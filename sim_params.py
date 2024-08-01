@@ -4,7 +4,7 @@ sim_name = 'test_l1'
 set_name = 'settings'
 
 
-single_weight_arr = np.linspace(0.4, 0.6, 20)
+single_weight_arr = np.linspace(0.4, 0.6, 2)
 counter_weight_arr = np.linspace(0.5, 0.5, 1)
 size_arr = np.linspace(40, 40, 1)
 
@@ -24,7 +24,7 @@ size_y = size
 mem_per_cpu = '500'
 time_limit = '00:10:00'
 
-n_samples = 4
+n_samples = 2
 n_steps = 100000000 * np.ones_like(size)
 n_therm = 100000000 * np.ones_like(size)
 

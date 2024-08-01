@@ -72,7 +72,7 @@ if os.path.isfile(dist_name):
 folder_names = os.listdir(foldername)
 
 curr_folder_check = sorted(os.listdir(foldername + '/0'))
-settings_check_path = foldername + '/' + folder_names[0] + '/' + curr_folder_check[-1]
+settings_check_path = foldername + '/0/' + curr_folder_check[-1]
 
 with h5.File(settings_check_path, "r") as settings_file:
     location = str(settings_file[SIM_LOC])
