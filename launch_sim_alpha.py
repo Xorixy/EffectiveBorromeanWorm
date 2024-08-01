@@ -69,8 +69,8 @@ elif os.environ['LOCATION'] == 'kraken':
                     "#SBATCH -J " + sim_params.sim_name,
                     "#SBATCH --mem-per-cpu=" + sim_params.mem_per_cpu,
                     "#SBATCH --time=" + sim_params.time_limit,
-                    ("#SBATCH --clusters=kraken",
-                     "#SBATCH --partition=all"                  
+                    "#SBATCH --clusters=kraken",
+                    "#SBATCH --partition=all"                  
                     ]
     run_list = []
     for i in range(len(sim_params.size)):
