@@ -79,14 +79,9 @@ elif os.environ['LOCATION'] == 'kraken':
                     "#SBATCH --array=0-" + str(len(sim_params.size) * sim_params.n_samples - 1),
                     "A=$((SLURM_ARRAY_TASK_ID/" + str(sim_params.n_samples) + "))",
                     "B=$((SLURM_ARRAY_TASK_ID%" + str(sim_params.n_samples) + "))",
-                    "D=$((SLURM_ARRAY_JOB_ID))",
                     ("./build/release-conan/EFFBORR -o " + foldername + '/$A/$B.h5 -s ' 
-                     + foldername + '/$A/' + sim_params.set_name + '.h5 -r $B'),
-                    "sbatch --depend=afterok:SC python ./samoling.py -f " + sim_params.sim_name
-                    ]
-
-            
-
+                     + foldername + '/$A/' + sim_params.set_name + '.h5 -r $B')
+                    ]     
 
     # Writing the runfile
     run_file = open(f"srunfile.sh", "w")
@@ -95,10 +90,18 @@ elif os.environ['LOCATION'] == 'kraken':
     run_file.close()
 
     # Submitting runfile
-    os.system("sbatch srunfile.sh")
-    # Deleting runfile
+    result_str = os.popen("sbatch srunfile.sh").read()
+    job_id = result_str.split()[3]
     os.remove("srunfile.sh")
-     
+
+    comm_list_2 = comm_list[:-4] + ["#SBATCH --depend=afterok:" + job_id, "srun python ./sampling.py -f " + sim_params.sim_name]
+    run_file = open(f"srunfile.sh", "w")
+    run_file.writelines("\n".join(comm_list_2))
+    run_file.close()
+    os.system("sbatch srunfile.sh")
+    os.remove("srunfile.sh")
+    # Deleting runfile
+    
 else:
     raise OSError(10, 'Unknown location')
 

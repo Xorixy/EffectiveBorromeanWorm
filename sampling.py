@@ -44,6 +44,12 @@ WINDING_SUM_RES_SMALL_Y_LOC = '/windings_sum_squared_y/small'
 ANNULUS_SUM_LOC = '/annulus_sum'
 PARTITION_FUNCTION_LOC = '/partition_function'
 
+SIZE_X_ARR_LOC = '/results/size_x'
+SIZE_Y_ARR_LOC = '/results/size_y'
+
+SINGLE_WEIGHT_ARR_LOC = '/results/single_weight'
+COUNTER_WEIGHT_ARR_LOC = '/results/counter_weight'
+
 ANNULUS_RES_LOC = '/results/annulus_res'
 ANNULUS_RES_STD_LOC = '/results/annulus_res_std'
 WINDING_DIFF_X_RES_LOC = '/results/windings_diff_squared_x'
@@ -174,6 +180,11 @@ with h5.File(dist_name, "w") as dist_file:
     dist_file[N_SAMPLES_LOC] = n_samples
     dist_file[NUMBER_OF_STEPS_LOC] = number_of_steps
 
+    dist_file[SIZE_X_ARR_LOC] = size_x_arr
+    dist_file[SIZE_Y_ARR_LOC] = size_y_arr
+    dist_file[SINGLE_WEIGHT_ARR_LOC] = single_weight_arr
+    dist_file[COUNTER_WEIGHT_ARR_LOC] = counter_weight_arr
+
     dist_file[ANNULUS_RES_LOC] = annulus_arr
     dist_file[ANNULUS_RES_STD_LOC] = annulus_arr_s
 
@@ -190,4 +201,3 @@ with h5.File(dist_name, "w") as dist_file:
     dist_file[WINDING_SUM_Y_RES_STD_LOC] = windings_sum_arr_y_s
 
 print('File ' + dist_name + ' is ready')
-
