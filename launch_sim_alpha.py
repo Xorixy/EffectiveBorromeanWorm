@@ -78,7 +78,7 @@ elif os.environ['LOCATION'] == 'kraken':
                     "A=$((SLURM_ARRAY_TASK_ID/" + str(sim_params.n_samples),
                     "B=$((SLURM_ARRAY_TASK_ID%" + str(sim_params.n_samples),
                     ("./build/release-conan/EFFBORR -o " + foldername + '/$A/$B.h5 -s ' 
-                     + foldername + '/A/' + sim_params.set_name + '.h5 -r $B')
+                     + foldername + '/$A/' + sim_params.set_name + '.h5 -r $B')
                     ]
 
             
