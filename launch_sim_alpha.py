@@ -79,8 +79,10 @@ elif os.environ['LOCATION'] == 'kraken':
                     "#SBATCH --array=0-" + str(len(sim_params.size) * sim_params.n_samples - 1),
                     "A=$((SLURM_ARRAY_TASK_ID/" + str(sim_params.n_samples) + "))",
                     "B=$((SLURM_ARRAY_TASK_ID%" + str(sim_params.n_samples) + "))",
+                    "D=$((SLURM_ARRAY_JOB_ID))",
                     ("./build/release-conan/EFFBORR -o " + foldername + '/$A/$B.h5 -s ' 
-                     + foldername + '/$A/' + sim_params.set_name + '.h5 -r $B')
+                     + foldername + '/$A/' + sim_params.set_name + '.h5 -r $B'),
+                    "sbatch --depend=afterok:SC python ./samoling.py -f " + sim_params.sim_name
                     ]
 
             
