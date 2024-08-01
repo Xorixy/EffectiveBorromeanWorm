@@ -77,8 +77,8 @@ elif os.environ['LOCATION'] == 'kraken':
                     "#SBATCH --clusters=kraken",
                     "#SBATCH --partition=all", 
                     "#SBATCH --array=0-" + str(len(sim_params.size) * sim_params.n_samples),
-                    "A=$((SLURM_ARRAY_TASK_ID/" + str(sim_params.n_samples),
-                    "B=$((SLURM_ARRAY_TASK_ID%" + str(sim_params.n_samples),
+                    "A=$((SLURM_ARRAY_TASK_ID/" + str(sim_params.n_samples) + "))",
+                    "B=$((SLURM_ARRAY_TASK_ID%" + str(sim_params.n_samples) + "))",
                     ("./build/release-conan/EFFBORR -o " + foldername + '/$A/$B.h5 -s ' 
                      + foldername + '/$A/' + sim_params.set_name + '.h5 -r $B')
                     ]
