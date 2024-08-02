@@ -80,7 +80,7 @@ elif os.environ['LOCATION'] == 'kraken':
                     "B=$((SLURM_ARRAY_TASK_ID%" + str(sim_params.n_samples) + "))",
                     "sleep $B",
                     "echo \"\n===========\nThis is job number $A, $B\"\n",
-                    ("./build/release-conan/EFFBORR -o " + foldername + '/$A/$B.h5 -s ' 
+                    ("./build/release-conan/EFFBORR -g -o " + foldername + '/$A/$B.h5 -s ' 
                      + foldername + '/$A/' + sim_params.set_name + '.h5 -r $B')
                     ]
 
@@ -94,8 +94,8 @@ elif os.environ['LOCATION'] == 'kraken':
     job_id = result_str.split()[3]
     os.remove("srunfile.sh")
 
-    comm_list_2 = comm_list[:-8] + ["#SBATCH --output=" + log_folder_name + "sampling.out",
-                                    "#SBATCH --error=" + log_folder_name + "sampling.err",
+    comm_list_2 = comm_list[:-8] + ["#SBATCH --output=" + log_folder_name + "/sampling.out",
+                                    "#SBATCH --error=" + log_folder_name + "/sampling.err",
                                     "#SBATCH --depend=afterok:" + job_id, "srun python ./sampling.py -f " + sim_params.sim_name]
     run_file = open(f"srunfile.sh", "w")
     run_file.writelines("\n".join(comm_list_2))

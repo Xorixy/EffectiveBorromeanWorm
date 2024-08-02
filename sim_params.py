@@ -1,6 +1,6 @@
 import numpy as np
 
-sim_name = 'simple_test_5'
+sim_name = 'simple_test_sampling_2'
 set_name = 'settings'
 
 
@@ -36,5 +36,5 @@ n_therm = 100000000 * np.ones_like(size)
 windings = 1 * np.ones_like(size)
 correlations = 0 * np.ones_like(size)
 annulus_size = 0.1 * np.ones_like(size)
-save_interval = 100000000 * np.ones_like(size)
+save_interval = 1000000 * np.ones_like(size)
 time_series = 1 * np.ones_like(size)

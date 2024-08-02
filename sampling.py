@@ -70,8 +70,10 @@ dist_name = os.environ['DATA_PATH'] + name + '.h5'
 if not os.path.isdir(foldername):
     raise OSError(1, 'No folder with such name')
 
+"""
 if os.path.isfile(dist_name):
     raise OSError(1, 'Data is ready')
+"""
 
 folder_names = os.listdir(foldername)
 
@@ -79,8 +81,8 @@ curr_folder_check = sorted(os.listdir(foldername + '/0'))
 settings_check_path = foldername + '/0/' + curr_folder_check[-1]
 
 with h5.File(settings_check_path, "r") as settings_file:
-    location = str(settings_file[SIM_LOC])
-    sim_params_string = str(settings_file[SIM_PARAMS_LOC])
+    location = np.array(settings_file[SIM_LOC])
+    sim_params_string = np.array(settings_file[SIM_PARAMS_LOC])
     save_interval = np.array(settings_file[SAVE_INTERVAL_LOC], dtype=np.int64)
     time_series = np.array(settings_file[TIME_SERIES_LOC], dtype=np.int64)
     n_steps = np.array(settings_file[N_STEPS_LOC], dtype=np.int64)
@@ -170,8 +172,6 @@ for l in range(n_systems):
     windings_sum_arr_y_s[l] = np.std((windings_sum_s_y / part_f).astype(np.float64), axis=0)
 
 with h5.File(dist_name, "w") as dist_file:
-    dist_file[SIM_LOC] = location
-    dist_file[SIM_PARAMS_LOC] = sim_params_string
     dist_file[N_STEPS_LOC] = n_steps_arr
     dist_file[N_THERM_LOC] = n_therm_arr
     dist_file[N_SYSTEMS_LOC] = n_systems
@@ -197,5 +197,8 @@ with h5.File(dist_name, "w") as dist_file:
 
     dist_file[WINDING_SUM_Y_RES_LOC] = windings_sum_arr_y
     dist_file[WINDING_SUM_Y_RES_STD_LOC] = windings_sum_arr_y_s
+    
+    dist_file.create_dataset(SIM_LOC, data=location)
+    dist_file.create_dataset(SIM_PARAMS_LOC, data=sim_params_string)
 
 print('File ' + dist_name + ' is ready')
