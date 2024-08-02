@@ -53,7 +53,6 @@ else:
 
 for i in range(len(sim_params.size)):
     os.mkdir(foldername + "/" + str(i))
-    os.mkdir(log_folder_name + "/" + str(i))
     settings_path = foldername + "/" + str(i) + '/' + sim_params.set_name + '.h5'
     add_settings(settings_path, sim_params, sim_params.windings[i], sim_params.correlations[i], 
                 sim_params.annulus_size[i], sim_params.save_interval[i], sim_params.time_series[i],
@@ -74,11 +73,11 @@ elif os.environ['LOCATION'] == 'kraken':
                     "#SBATCH --time=" + sim_params.time_limit,
                     "#SBATCH --clusters=kraken",
                     "#SBATCH --partition=all", 
+                    "#SBATCH --output=" + log_folder_name + r"/%a.out",
+                    "#SBATCH --error=" + log_folder_name + r"/%a.err",
                     "#SBATCH --array=0-" + str(len(sim_params.size) * sim_params.n_samples - 1),
                     "A=$((SLURM_ARRAY_TASK_ID/" + str(sim_params.n_samples) + "))",
                     "B=$((SLURM_ARRAY_TASK_ID%" + str(sim_params.n_samples) + "))",
-                    "#SBATCH --output=" + log_folder_name + "/$A/$B.out",
-                    "#SBATCH --error=" + log_folder_name + "/$A/$B.err",
                     "sleep $B",
                     "echo \"\n===========\nThis is job number $A, $B\"\n",
                     ("./build/release-conan/EFFBORR -o " + foldername + '/$A/$B.h5 -s ' 
