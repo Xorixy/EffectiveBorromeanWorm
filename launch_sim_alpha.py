@@ -21,6 +21,7 @@ SINGLE_WEIGHT_LOC = '/settings/sim/single_weight'
 COUNTER_WEIGHT_LOC = '/settings/sim/counter_weight'
 
 foldername = os.environ['SIM_PATH'] + sim_params.sim_name
+log_folder_name = os.environ['LOG_PATH'] + sim_params.sim_name
 
 def add_settings(filename, sim_params, windings, correlations, annulus_size, save_interval, time_series,
                  size_x, size_y, n_steps, n_therm, single_weight, counter_weight):
@@ -69,18 +70,18 @@ elif os.environ['LOCATION'] == 'kraken':
                     "#SBATCH -J " + sim_params.sim_name,
                     "#SBATCH --mem-per-cpu=" + sim_params.mem_per_cpu,
                     "#SBATCH --time=" + sim_params.time_limit,
-                    "#SBATCH --output=logs/"+sim_params.sim_name+".out",
-                    "#SBATCH --error=logs/"+sim_params.sim_name+".err",
                     "#SBATCH --clusters=kraken",
                     "#SBATCH --partition=all", 
                     "#SBATCH --array=0-" + str(len(sim_params.size) * sim_params.n_samples - 1),
                     "A=$((SLURM_ARRAY_TASK_ID/" + str(sim_params.n_samples) + "))",
                     "B=$((SLURM_ARRAY_TASK_ID%" + str(sim_params.n_samples) + "))",
+                    "#SBATCH --output=" + log_folder_name + "/$A/$B.out",
+                    "#SBATCH --error=" + log_folder_name + "/$A/$B.err",
                     "sleep $B",
                     "echo \"\n===========\nThis is job number $A, $B\"\n",
                     ("./build/release-conan/EFFBORR -o " + foldername + '/$A/$B.h5 -s ' 
                      + foldername + '/$A/' + sim_params.set_name + '.h5 -r $B')
-                    ]     
+                    ]
 
     # Writing the runfile
     run_file = open(f"srunfile.sh", "w")
@@ -92,7 +93,9 @@ elif os.environ['LOCATION'] == 'kraken':
     job_id = result_str.split()[3]
     os.remove("srunfile.sh")
 
-    comm_list_2 = comm_list[:-6] + ["#SBATCH --depend=afterok:" + job_id, "srun python ./sampling.py -f " + sim_params.sim_name]
+    comm_list_2 = comm_list[:-8] + ["#SBATCH --output=" + log_folder_name + "sampling.out",
+                                    "#SBATCH --error=" + log_folder_name + "sampling.err",
+                                    "#SBATCH --depend=afterok:" + job_id, "srun python ./sampling.py -f " + sim_params.sim_name]
     run_file = open(f"srunfile.sh", "w")
     run_file.writelines("\n".join(comm_list_2))
     run_file.close()
