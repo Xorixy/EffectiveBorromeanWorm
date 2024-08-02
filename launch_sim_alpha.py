@@ -44,7 +44,6 @@ def add_settings(filename, sim_params, windings, correlations, annulus_size, sav
         f[SINGLE_WEIGHT_LOC] = np.float64(single_weight)
         f[COUNTER_WEIGHT_LOC] = np.float64(counter_weight)
 
-
 if not os.path.isdir(foldername):
      os.mkdir(foldername)
 else:
@@ -79,11 +78,14 @@ elif os.environ['LOCATION'] == 'kraken':
                     "#SBATCH --array=0-" + str(len(sim_params.size) * sim_params.n_samples - 1),
                     "A=$((SLURM_ARRAY_TASK_ID/" + str(sim_params.n_samples) + "))",
                     "B=$((SLURM_ARRAY_TASK_ID%" + str(sim_params.n_samples) + "))",
+                    "sleep $B",
+                    "echo \"\n===========\nThis is job number $A, $B\"\n",
                     ("./build/release-conan/EFFBORR -o " + foldername + '/$A/$B.h5 -s ' 
                      + foldername + '/$A/' + sim_params.set_name + '.h5 -r $B')
                     ]     
 
     # Writing the runfile
+    #print(str(len(sim_params.size) * sim_params.n_samples))
     run_file = open(f"srunfile.sh", "w")
     #printstr = f"echo \"\n===========\nThis is job number {i}, {j}\"\n"
     run_file.writelines("\n".join(comm_list))
@@ -94,7 +96,7 @@ elif os.environ['LOCATION'] == 'kraken':
     job_id = result_str.split()[3]
     os.remove("srunfile.sh")
 
-    comm_list_2 = comm_list[:-4] + ["#SBATCH --depend=afterok:" + job_id, "srun python ./sampling.py -f " + sim_params.sim_name]
+    comm_list_2 = comm_list[:-6] + ["#SBATCH --depend=afterok:" + job_id, "srun python ./sampling.py -f " + sim_params.sim_name]
     run_file = open(f"srunfile.sh", "w")
     run_file.writelines("\n".join(comm_list_2))
     run_file.close()
