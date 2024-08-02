@@ -49,8 +49,6 @@ if not os.path.isdir(foldername):
 else:
     raise OSError(4, 'Folder already exists')
 
-#subprocess.run(['build/release-conan/CMT', filename]) 
-
 for i in range(len(sim_params.size)):
     os.mkdir(foldername + "/" + str(i))
     settings_path = foldername + "/" + str(i) + '/' + sim_params.set_name + '.h5'
@@ -85,9 +83,7 @@ elif os.environ['LOCATION'] == 'kraken':
                     ]     
 
     # Writing the runfile
-    #print(str(len(sim_params.size) * sim_params.n_samples))
     run_file = open(f"srunfile.sh", "w")
-    #printstr = f"echo \"\n===========\nThis is job number {i}, {j}\"\n"
     run_file.writelines("\n".join(comm_list))
     run_file.close()
 

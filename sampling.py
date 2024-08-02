@@ -5,8 +5,6 @@ import struct as st
 from multiprocessing import Pool
 import h5py as h5
 
-BASE = 4611686018427387904
-
 SIM_LOC = '/system_data/location'
 SIM_PARAMS_LOC = '/system_data/sim_params'
 

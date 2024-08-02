@@ -1,6 +1,6 @@
 import numpy as np
 
-sim_name = 'test_s2'
+sim_name = 'simple_test'
 set_name = 'settings'
 
 
