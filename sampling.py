@@ -86,7 +86,7 @@ with h5.File(settings_check_path, "r") as settings_file:
     save_interval = np.array(settings_file[SAVE_INTERVAL_LOC], dtype=np.int64)
     time_series = np.array(settings_file[TIME_SERIES_LOC], dtype=np.int64)
     n_steps = np.array(settings_file[N_STEPS_LOC], dtype=np.int64)
-    base = np.array(settings_file[BASE_MINUS_ONE_LOC], dtype=np.uint64) + 1
+    base = np.array(settings_file[BASE_MINUS_ONE_LOC], dtype=np.uint64).astype(dtype=object) + 1
     
 
 n_systems = len(folder_names)

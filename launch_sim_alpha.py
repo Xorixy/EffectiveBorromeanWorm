@@ -103,6 +103,41 @@ elif os.environ['LOCATION'] == 'kraken':
     os.system("sbatch srunfile.sh")
     os.remove("srunfile.sh")
     # Deleting runfile
+
+elif os.environ['LOCATION'] == 'Tetralith':
+    comm_list = [ "#!/bin/bash -l",
+                    "#SBATCH -J " + sim_params.sim_name,
+                    "#SBATCH --mem-per-cpu=" + sim_params.mem_per_cpu,
+                    "#SBATCH --time=" + sim_params.time_limit,
+                    "#SBATCH --output=" + log_folder_name + r"/%a.out",
+                    "#SBATCH --error=" + log_folder_name + r"/%a.err",
+                    "#SBATCH --array=0-" + str(len(sim_params.size) * sim_params.n_samples - 1),
+                    "A=$((SLURM_ARRAY_TASK_ID/" + str(sim_params.n_samples) + "))",
+                    "B=$((SLURM_ARRAY_TASK_ID%" + str(sim_params.n_samples) + "))",
+                    "sleep $B",
+                    "echo \"\n===========\nThis is job number $A, $B\"\n",
+                    ("./build/release-conan/EFFBORR -o " + foldername + '/$A/$B.h5 -s ' 
+                     + foldername + '/$A/' + sim_params.set_name + '.h5 -r $B')
+                    ]
+
+    # Writing the runfile
+    run_file = open(f"srunfile.sh", "w")
+    run_file.writelines("\n".join(comm_list))
+    run_file.close()
+
+    # Submitting runfile
+    result_str = os.popen("sbatch srunfile.sh").read()
+    job_id = result_str.split()[3]
+    os.remove("srunfile.sh")
+
+    comm_list_2 = comm_list[:-8] + ["#SBATCH --output=" + log_folder_name + "sampling.out",
+                                    "#SBATCH --error=" + log_folder_name + "sampling.err",
+                                    "#SBATCH --depend=afterok:" + job_id, "srun python ./sampling.py -f " + sim_params.sim_name]
+    run_file = open(f"srunfile.sh", "w")
+    run_file.writelines("\n".join(comm_list_2))
+    run_file.close()
+    os.system("sbatch srunfile.sh")
+    os.remove("srunfile.sh")
     
 else:
     raise OSError(10, 'Unknown location')
