@@ -68,6 +68,19 @@
       ]
     },
     {
+      "name": "tetralith",
+      "displayName": "Release|march=native|LTO|conan package manager",
+      "inherits": [
+        "release",
+        "conan",
+        "default"
+      ],
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "icc",
+        "CMAKE_CXX_COMPILER": "icc"
+      }
+    },
+    {
       "name": "debug-conan",
       "displayName": "Debug|conan package manager",
       "inherits": [
@@ -85,6 +98,10 @@
     {
       "name": "debug-conan",
       "configurePreset": "debug-conan"
+    },
+    {
+      "name": "tetralith",
+      "configurePreset": "tetralith"
     }
   ],
   "testPresets": [
@@ -92,6 +109,19 @@
       "name": "release-conan",
       "displayName": "Release|conan package manager",
       "configurePreset": "release-conan",
+      "output": {
+        "verbosity": "extra",
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error",
+        "stopOnFailure": true
+      }
+    },
+    {
+      "name": "tetralith",
+      "displayName": "Tetralith|conan package manager",
+      "configurePreset": "tetralith",
       "output": {
         "verbosity": "extra",
         "outputOnFailure": true
