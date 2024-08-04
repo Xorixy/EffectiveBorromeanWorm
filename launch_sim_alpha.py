@@ -116,11 +116,16 @@ elif os.environ['LOCATION'] == 'Tetralith':
                     "B=$((SLURM_ARRAY_TASK_ID%" + str(sim_params.n_samples) + "))",
                     "sleep $B",
                     "echo \"\n===========\nThis is job number $A, $B\"\n",
-                    ("./build/release-conan/EFFBORR -g -o " + foldername + '/$A/$B.h5 -s ' 
+                    ("./build/release-conan/EFFBORR -o " + foldername + '/$A/$B.h5 -s ' 
                      + foldername + '/$A/' + sim_params.set_name + '.h5 -r $B')
                     ]
 
     # Writing the runfile
+
+    time_list = list(map(int, sim_params.time_limit.split(':')))
+    time = time_list[0] * 3600 + time_list[1] * 60 + time_list[2]
+    if (sim_params.devel and len(sim_params.size) * sim_params.n_samples <= 64 and time <= 3600):
+        comm_list.insert(2, "#SBATCH --reservation=now")
     run_file = open(f"srunfile.sh", "w")
     run_file.writelines("\n".join(comm_list))
     run_file.close()

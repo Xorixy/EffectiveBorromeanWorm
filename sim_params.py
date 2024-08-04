@@ -1,6 +1,6 @@
 import numpy as np
 
-sim_name = 'simple_test_sampling_2'
+sim_name = 'Tetralith_test'
 set_name = 'settings'
 
 
@@ -23,6 +23,7 @@ size_y = size
 
 mem_per_cpu = '500'
 time_limit = '00:10:00'
+devel = True
 
 n_samples = 5
 n_steps = 100000000 * np.ones_like(size)
@@ -34,7 +35,7 @@ n_therm = 100000000 * np.ones_like(size)
 #counter_weight = 0.4
 
 windings = 1 * np.ones_like(size)
-correlations = 0 * np.ones_like(size)
+correlations = 1 * np.ones_like(size)
 annulus_size = 0.1 * np.ones_like(size)
 save_interval = 1000000 * np.ones_like(size)
 time_series = 1 * np.ones_like(size)
