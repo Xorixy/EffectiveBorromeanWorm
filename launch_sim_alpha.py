@@ -105,6 +105,11 @@ elif os.environ['LOCATION'] == 'kraken':
     # Deleting runfile
 
 elif os.environ['LOCATION'] == 'Tetralith':
+    tet_path = "./build/tetralith/EFFBORR"
+    if os.path.exists(tet_path):
+        exe_path = tet_path
+    else:
+        exe_path = "./build/release-conan/EFFBORR"
     comm_list = [ "#!/bin/bash -l",
                     "#SBATCH -J " + sim_params.sim_name,
                     "#SBATCH --mem-per-cpu=" + sim_params.mem_per_cpu,
@@ -116,7 +121,7 @@ elif os.environ['LOCATION'] == 'Tetralith':
                     "B=$((SLURM_ARRAY_TASK_ID%" + str(sim_params.n_samples) + "))",
                     "sleep $B",
                     "echo \"\n===========\nThis is job number $A, $B\"\n",
-                    ("./build/release-conan/EFFBORR -o " + foldername + '/$A/$B.h5 -s ' 
+                    (exe_path + " -o " + foldername + '/$A/$B.h5 -s ' 
                      + foldername + '/$A/' + sim_params.set_name + '.h5 -r $B')
                     ]
 
