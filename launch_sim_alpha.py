@@ -140,7 +140,10 @@ elif os.environ['LOCATION'] == 'Tetralith':
     job_id = result_str.split()[3]
     os.remove("srunfile.sh")
 
-    comm_list_2 = comm_list[:-8] + ["#SBATCH --output=" + log_folder_name + "/sampling.out",
+    comm_list_2 = comm_list[:-11] + [ "#SBATCH -J " + sim_params.sim_name + '_pp',
+                                    "#SBATCH --mem-per-cpu=2000",
+                                    "#SBATCH --time=00:05:00", 
+                                    "#SBATCH --output=" + log_folder_name + "/sampling.out",
                                     "#SBATCH --error=" + log_folder_name + "/sampling.err",
                                     "#SBATCH --depend=afterok:" + job_id, "srun python ./sampling.py -f " + sim_params.sim_name]
     run_file = open(f"srunfile.sh", "w")
