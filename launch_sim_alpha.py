@@ -105,6 +105,11 @@ elif os.environ['LOCATION'] == 'kraken':
     # Deleting runfile
 
 elif os.environ['LOCATION'] == 'Tetralith':
+    tet_path = "./build/tetralith/EFFBORR"
+    if os.path.exists(tet_path):
+        exe_path = tet_path
+    else:
+        exe_path = "./build/release-conan/EFFBORR"
     comm_list = [ "#!/bin/bash -l",
                     "#SBATCH -J " + sim_params.sim_name,
                     "#SBATCH --mem-per-cpu=" + sim_params.mem_per_cpu,
@@ -116,7 +121,7 @@ elif os.environ['LOCATION'] == 'Tetralith':
                     "B=$((SLURM_ARRAY_TASK_ID%" + str(sim_params.n_samples) + "))",
                     "sleep $B",
                     "echo \"\n===========\nThis is job number $A, $B\"\n",
-                    ("./build/release-conan/EFFBORR -o " + foldername + '/$A/$B.h5 -s ' 
+                    (exe_path + " -o " + foldername + '/$A/$B.h5 -s ' 
                      + foldername + '/$A/' + sim_params.set_name + '.h5 -r $B')
                     ]
 
@@ -125,7 +130,7 @@ elif os.environ['LOCATION'] == 'Tetralith':
     time_list = list(map(int, sim_params.time_limit.split(':')))
     time = time_list[0] * 3600 + time_list[1] * 60 + time_list[2]
     if (sim_params.devel and len(sim_params.size) * sim_params.n_samples <= 64 and time <= 3600):
-        comm_list.insert(2, "#SBATCH --reservation=now")
+        comm_list.insert(1, "#SBATCH --reservation=now")
     run_file = open(f"srunfile.sh", "w")
     run_file.writelines("\n".join(comm_list))
     run_file.close()
@@ -135,7 +140,10 @@ elif os.environ['LOCATION'] == 'Tetralith':
     job_id = result_str.split()[3]
     os.remove("srunfile.sh")
 
-    comm_list_2 = comm_list[:-8] + ["#SBATCH --output=" + log_folder_name + "/sampling.out",
+    comm_list_2 = comm_list[:-11] + [ "#SBATCH -J " + sim_params.sim_name + '_pp',
+                                    "#SBATCH --mem-per-cpu=2000",
+                                    "#SBATCH --time=00:05:00", 
+                                    "#SBATCH --output=" + log_folder_name + "/sampling.out",
                                     "#SBATCH --error=" + log_folder_name + "/sampling.err",
                                     "#SBATCH --depend=afterok:" + job_id, "srun python ./sampling.py -f " + sim_params.sim_name]
     run_file = open(f"srunfile.sh", "w")

@@ -6,6 +6,8 @@ libs/
 .vscode/
 toolchains/
 
+__pycache__/
+
 simulations/
 data/
 logs/

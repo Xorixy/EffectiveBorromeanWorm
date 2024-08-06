@@ -1,6 +1,6 @@
 import numpy as np
 
-sim_name = 'Tetralith_test'
+sim_name = 'Tetralith_test_2'
 set_name = 'settings'
 
 
