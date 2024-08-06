@@ -59,5 +59,7 @@ int cli::parse(int argc, char *argv[]) {
     if (settings::io::replace_file) io::outfile = h5pp::File(settings::io::filename, h5pp::FileAccess::REPLACE);
     else io::outfile = h5pp::File(settings::io::filename, h5pp::FileAccess::COLLISION_FAIL);
 
+    rnd::seed(settings::random::seed);
+
     return 0;
 }
