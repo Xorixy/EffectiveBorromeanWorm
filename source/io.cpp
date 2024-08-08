@@ -1,7 +1,7 @@
 #include "../include/io.h"
 
 void io::load_settings() {
-    const h5pp::File s_file(settings::io::settings_path, h5pp::FileAccess::READONLY);
+    const h5pp::File s_file = try_to_open_file(settings::io::settings_path, true);
     s_file.readDataset<int>(settings::sim::size_x, "settings/sim/size_x");
     s_file.readDataset<int>(settings::sim::size_y, "settings/sim/size_y");
     s_file.readDataset<long long unsigned int>(settings::sim::n_steps, "settings/sim/n_steps");
@@ -16,9 +16,7 @@ void io::load_settings() {
 }
 
 void io::save_settings() {
-    h5pp::File s_file;
-    if (settings::io::replace_file) s_file = h5pp::File(settings::io::settings_path, h5pp::FileAccess::REPLACE);
-    else s_file = h5pp::File(settings::io::settings_path, h5pp::FileAccess::COLLISION_FAIL);
+    h5pp::File s_file = try_to_open_file(settings::io::settings_path, false);
     s_file.writeDataset<int>(settings::sim::size_x, "settings/sim/size_x");
     s_file.writeDataset<int>(settings::sim::size_y, "settings/sim/size_y");
     s_file.writeDataset<long long unsigned int>(settings::sim::n_steps, "settings/sim/n_steps");
@@ -33,13 +31,11 @@ void io::save_settings() {
 }
 
 void io::save_base() {
-    h5pp::File s_file(settings::io::settings_path, h5pp::FileAccess::READWRITE);
-    s_file.writeDataset<long long unsigned int>(ULLONG_MAX, "settings/sim/base_minus_one");
+    io::outfile.writeDataset<long long unsigned int>(ULLONG_MAX, "constants/base_minus_one");
 }
 
 void io::save_annulus_size(const int annulus_size) {
-    h5pp::File s_file(settings::io::settings_path, h5pp::FileAccess::READWRITE);
-    s_file.writeDataset(annulus_size, "settings/sim/annulus_area");
+    io::outfile.writeDataset(annulus_size, "constants/annulus_area");
 }
 
 
@@ -55,3 +51,41 @@ void io::save_slice(const sim::SaveStruct& save, const std::string& prefix) {
     io::outfile.writeDataset<long long unsigned int>(save.partition_function, prefix + "/partition_function");
     io::outfile.writeDataset<long long unsigned int>(save.annulus_sum, prefix + "/annulus_sum");
 }
+
+void io::save_time_series(const sim::TimeSeriesStruct& save, const std::string& prefix) {
+    io::save_uint_vec(save.windings_difference_squared_x, prefix + "/windings_diff_squared_x");
+    io::save_uint_vec(save.windings_difference_squared_y, prefix + "/windings_diff_squared_y");
+    io::save_uint_vec(save.windings_sum_squared_x, prefix + "/windings_sum_squared_x");
+    io::save_uint_vec(save.windings_sum_squared_y, prefix + "/windings_sum_squared_y");
+    io::outfile.writeDataset<std::vector<long long unsigned int>>(save.partition_function, prefix + "/partition_function");
+    io::outfile.writeDataset<std::vector<long long unsigned int>>(save.annulus_sum, prefix + "/annulus_sum");
+}
+
+h5pp::File io::try_to_open_file(const std::string& filename, bool readonly) {
+    int n_tries = 0;
+    h5pp::File file;
+    while(true) {
+        try {
+            if (!readonly) {
+                if (settings::io::replace_file) file = h5pp::File(filename, h5pp::FileAccess::REPLACE);
+                else file = h5pp::File(filename, h5pp::FileAccess::COLLISION_FAIL);
+            } else {
+                file = h5pp::File(filename, h5pp::FileAccess::READONLY);
+            }
+            break;
+        } catch (std::exception &e) {
+            logger::log->info("Failed to open file with error: {}\n", e.what());
+            logger::log->info("Waiting 3 seconds and trying again...\n");
+            std::this_thread::sleep_for(std::chrono::seconds(3));
+            n_tries++;
+            if (n_tries >= 10) throw e;
+        }
+    }
+    return file;
+}
+
+void io::save_uint_vec(const simple_uint128_vec& vec, const std::string &path) {
+    io::outfile.writeDataset<std::vector<unsigned long long int>>(vec.bigs  , path + "/big");
+    io::outfile.writeDataset<std::vector<unsigned long long int>>(vec.smalls, path + "/small");
+}
+
