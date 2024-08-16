@@ -71,7 +71,6 @@
       "name": "tetralith",
       "displayName": "Release|march=native|LTO|conan package manager",
       "inherits": [
-        "release",
         "conan",
         "default"
       ],
