@@ -43,8 +43,6 @@ int cli::parse(int argc, char *argv[]) {
         }
     }
 
-    if (settings::random::seed == 0) io::save_base();
-
     io::load_settings();
 
     settings::worm::single_to_counter_ratio = settings::sim::counter_weight/settings::sim::single_weight;
@@ -55,9 +53,6 @@ int cli::parse(int argc, char *argv[]) {
     logger::print_params();
 
     if (debug) return 2;
-
-    if (settings::io::replace_file) io::outfile = h5pp::File(settings::io::filename, h5pp::FileAccess::REPLACE);
-    else io::outfile = h5pp::File(settings::io::filename, h5pp::FileAccess::COLLISION_FAIL);
 
     rnd::seed(settings::random::seed);
 

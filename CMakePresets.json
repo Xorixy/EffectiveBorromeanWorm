@@ -76,8 +76,8 @@
         "default"
       ],
       "cacheVariables": {
-        "CMAKE_C_COMPILER": "icx",
-        "CMAKE_CXX_COMPILER": "icpx"
+        "CMAKE_C_COMPILER": "icc",
+        "CMAKE_CXX_COMPILER": "icpc"
       }
     },
     {

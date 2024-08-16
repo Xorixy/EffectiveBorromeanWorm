@@ -47,7 +47,8 @@ def add_settings(filename, sim_params, windings, correlations, annulus_size, sav
 
 if not os.path.isdir(foldername):
      os.mkdir(foldername)
-     os.mkdir(log_folder_name)
+     if os.environ['LOCATION'] == 'kraken' or os.environ['LOCATION'] == 'Tetralith':
+        os.mkdir(log_folder_name)
 else:
     raise OSError(4, 'Folder already exists')
 

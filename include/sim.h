@@ -18,11 +18,24 @@ namespace sim {
         long long unsigned int annulus_sum { 0 };
     };
 
+    struct TimeSeriesStruct {
+        simple_uint128_vec windings_sum_squared_x;
+        simple_uint128_vec windings_sum_squared_y;
+        simple_uint128_vec windings_difference_squared_x;
+        simple_uint128_vec windings_difference_squared_y;
+        std::vector<long long unsigned int> partition_function;
+        std::vector<long long unsigned int> annulus_sum;
+
+        TimeSeriesStruct();
+        void add_slice(const SaveStruct &save);
+    };
+
     class Simulation {
         private:
             state::State m_state;
             state::Annulus m_annulus;
             SaveStruct save;
+            TimeSeriesStruct time;
         public:
             Simulation();
             void print_save_data();

@@ -30,27 +30,24 @@ void sim::Simulation::run() {
         m_state.try_to_move_worm();
         extract_state_data();
         i_iter++;
-        /*
-        fmt::print("Iteration {}\n", i_iter);
-        m_state.print_windings();
-        fmt::print("Diffsqr: {}\n", m_state.get_winding_diff_square());
-        fmt::print("Sumsqr: {}\n\n", m_state.get_winding_sum_square());
-        fmt::print("Saved data:\n");
-        print_save_data();
-        fmt::print("\n");
-        */
         if (settings::save::time_series && i_iter % settings::save::save_interval == 0) {
-            //fmt::print("Saving slice\n");
-            try {
-                io::save_slice(save, std::to_string(i_iter) + "/");
-            } catch (std::exception& e) {
-                logger::log->info("Error {}\n", e.what());
-                return;
-            }
+            time.add_slice(save);
         }
     }
+    elapsed = std::chrono::steady_clock::now() - start_time;
+    logger::log->info("Done in {} s\n", elapsed.count());
+    start_time = std::chrono::steady_clock::now();
+    logger::log->info("Saving simulation...");
+    io::outfile = io::try_to_open_file(settings::io::filename, false);
+    io::save_base();
+    io::save_annulus_size(m_annulus.get_size());
     if (!settings::save::time_series || i_iter % settings::save::save_interval != 0) {
-        io::save_slice(save, std::to_string(i_iter) + "/");
+        time.add_slice(save);
+    }
+    if (settings::save::time_series) {
+        io::save_time_series(time, "data/");
+    } else {
+        io::save_slice(save, "data/");
     }
 
     elapsed = std::chrono::steady_clock::now() - start_time;
@@ -75,3 +72,20 @@ void sim::Simulation::extract_state_data() {
         save.annulus_sum++;
 }
 
+sim::TimeSeriesStruct::TimeSeriesStruct()
+    : windings_sum_squared_x(0)
+    , windings_sum_squared_y(0)
+    , windings_difference_squared_x(0)
+    , windings_difference_squared_y(0)
+    , partition_function(0)
+    , annulus_sum(0)
+{}
+
+void sim::TimeSeriesStruct::add_slice(const SaveStruct &save) {
+    windings_sum_squared_x.push_back(save.windings_sum_squared_x);
+    windings_sum_squared_y.push_back(save.windings_sum_squared_y);
+    windings_difference_squared_x.push_back(save.windings_difference_squared_x);
+    windings_difference_squared_y.push_back(save.windings_difference_squared_y);
+    partition_function.push_back(save.partition_function);
+    annulus_sum.push_back(save.annulus_sum);
+}

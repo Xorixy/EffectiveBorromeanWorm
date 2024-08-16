@@ -14,4 +14,5 @@ void logger::print_params() {
     logger::log->info("save_interval    : {}", settings::save::save_interval);
     logger::log->info("seed             : {}", settings::random::seed);
     logger::log->info("filename         : {}", settings::io::filename);
+    logger::log->info("replace files    : {}", settings::io::replace_file);
 }
