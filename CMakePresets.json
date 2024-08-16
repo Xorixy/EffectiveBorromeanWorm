@@ -77,7 +77,8 @@
       ],
       "cacheVariables": {
         "CMAKE_C_COMPILER": "icc",
-        "CMAKE_CXX_COMPILER": "icpc"
+        "CMAKE_CXX_COMPILER": "icpc",
+        "CMAKE_CXX_FLAGS_RELEASE": "-O2 -ip -xCORE-AVX512"
       }
     },
     {
