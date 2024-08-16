@@ -241,6 +241,7 @@ function(detect_compiler COMPILER COMPILER_VERSION COMPILER_RUNTIME COMPILER_RUN
         list(GET VERSION_LIST 0 _COMPILER_VERSION)
     elseif(_COMPILER MATCHES Intel)
         set(_COMPILER "intel-cc")
+        set(_COMPILER_MODE "icx")
         list(GET ${CMAKE_CXX_COMPILER_VERSION} _COMPILER_VERSION)
     elseif(_COMPILER MATCHES GNU)
         set(_COMPILER "gcc")
