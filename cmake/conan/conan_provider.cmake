@@ -243,6 +243,7 @@ function(detect_compiler COMPILER COMPILER_VERSION COMPILER_RUNTIME COMPILER_RUN
         set(_COMPILER "intel-cc")
         set(_COMPILER_MODE "icx")
         list(GET ${CMAKE_CXX_COMPILER_VERSION} _COMPILER_VERSION)
+        string(APPEND PROFILE "tools.intel:installation_path=/opt/intel/oneapi")
     elseif(_COMPILER MATCHES GNU)
         set(_COMPILER "gcc")
         string(REPLACE "." ";" VERSION_LIST ${CMAKE_CXX_COMPILER_VERSION})
