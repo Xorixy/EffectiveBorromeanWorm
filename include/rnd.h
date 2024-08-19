@@ -11,8 +11,8 @@ namespace rnd {
     void seed(std::optional<uint64_t> number = std::nullopt);
 
     template<typename T>
-    requires std::is_arithmetic_v<T>
     [[nodiscard]] T uniform(T min, T max) {
+        static_assert(std::is_arithmetic_v<T>);
         if constexpr(std::is_integral_v<T>) {
             std::uniform_int_distribution<T> dist(min, max);
             return dist(internal::prng);
@@ -25,8 +25,8 @@ namespace rnd {
 
 
     template<typename T>
-    requires std::is_floating_point_v<T>
     [[nodiscard]] T normal(T mu, T sigma) {
+        static_assert(std::is_floating_point_v<T>);
         std::normal_distribution<T> dist(mu, sigma);
         return dist(internal::prng);
     }

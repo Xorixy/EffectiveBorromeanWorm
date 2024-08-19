@@ -37,7 +37,7 @@ target_include_directories(EFFBORR PRIVATE source)
 
 
 ### Find dependencies
-find_package(h5pp       1.11.1  REQUIRED)
+find_package(h5pp       1.11.2  REQUIRED)
 find_package(pcg-cpp            REQUIRED)
 find_package(nanobench  4.3.11  REQUIRED)
 find_package(CLI11      2.3.2   REQUIRED)

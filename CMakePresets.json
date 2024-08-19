@@ -15,7 +15,7 @@
         "CMT_BUILD_BENCH": "FALSE",
         "CMT_BUILD_EXAMPLES": "TRUE",
         "CMT_CMAKE_DEBUG": "TRUE",
-        "CMAKE_CXX_STANDARD": "20",
+        "CMAKE_CXX_STANDARD": "17",
         "CMAKE_CXX_STANDARD_REQUIRED": "TRUE",
         "CMAKE_CXX_EXTENSIONS": "FALSE",
         "CMAKE_POSITION_INDEPENDENT_CODE": "TRUE",
@@ -75,10 +75,12 @@
         "default"
       ],
       "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_INTERPROCEDURAL_OPTIMIZATION": "TRUE",
         "CMAKE_C_COMPILER": "icc",
         "CMAKE_CXX_COMPILER": "icpc",
-        "CMAKE_CXX_FLAGS_RELEASE": "-O3 -ip -xCORE-AVX512",
-        "CMAKE_CXX_COMPILER_VERSION": "2024.0"
+        "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG -march=native -mtune=native -ip",
+        "CMAKE_CXX_COMPILER_VERSION": "2021.9"
       }
     },
     {
