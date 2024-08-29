@@ -87,3 +87,10 @@ if(EFFBORR_CMAKE_DEBUG)
     include(cmake/PrintTargetInfo.cmake)
     print_and_write_project_summary(EFFBORR)
 endif()
+
+##Intel stuff
+if (EFFBORR_INTEL_MKL)
+    # Link mkl libraries
+    include_directories(/software/sse2/tetralith_el9/easybuild/pure/software/imkl/2023.1.0/mkl/2023.1.0/include)
+    link_directories(/software/sse2/tetralith_el9/easybuild/pure/software/imkl/2023.1.0/mkl/2023.1.0/lib)
+endif()
