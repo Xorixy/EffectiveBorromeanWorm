@@ -8,6 +8,7 @@
 #include <string>
 #include <iostream>
 #include <exception>
+#include "mkl.h"
 
 int main(int argc, char * argv[]) {
     std::chrono::time_point<std::chrono::steady_clock> start_time;
