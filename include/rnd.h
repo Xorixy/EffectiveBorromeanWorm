@@ -2,13 +2,22 @@
 #include <optional>
 #include <pcg_random.hpp>
 #include <random>
+#include "settings.h"
 
 namespace rnd {
     namespace internal {
         inline pcg64 prng; // The pseudorandom number generator
+        inline std::optional<std::uniform_int_distribution<int>> direction_dist;
+        inline std::optional<std::uniform_real_distribution<double>> unit_dist;
+        inline std::optional<std::uniform_int_distribution<int>> location_dist;
+        inline std::optional<std::uniform_int_distribution<int>> color_dist;
     }
 
     void seed(std::optional<uint64_t> number = std::nullopt);
+    double uniform_unit();
+    int uniform_dir();
+    int uniform_loc();
+    int uniform_color();
 
     template<typename T>
     [[nodiscard]] T uniform(T min, T max) {

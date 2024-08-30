@@ -123,10 +123,10 @@ void state::State::try_to_add_bond(int dir) {
     if (cb == -1) {
         if (
             (bonds.at(cf) == -1 && (bonds.at(other_color(cf)) == 0
-            || rnd::uniform(0.0, 1.0) < settings::worm::counter_to_single_ratio))
+            || rnd::uniform_unit() < settings::worm::counter_to_single_ratio))
             || (bonds.at(cf) == 0 &&
-            ((bonds.at(other_color(cf)) == 0 && rnd::uniform(0.0, 1.0) < settings::sim::single_weight)
-            || (bonds.at(other_color(cf)) == -1 && rnd::uniform(0.0, 1.0) < settings::worm::single_to_counter_ratio)))
+            ((bonds.at(other_color(cf)) == 0 && rnd::uniform_unit() < settings::sim::single_weight)
+            || (bonds.at(other_color(cf)) == -1 && rnd::uniform_unit() < settings::worm::single_to_counter_ratio)))
         )
         {
             m_bonds.at(p).at(dir).at(cf) += 1;
@@ -141,10 +141,10 @@ void state::State::try_to_add_bond(int dir) {
     else if (cf == -1) {
         if (
             (bonds.at(cb) == 1 && (bonds.at(other_color(cb)) == 0
-                                    || rnd::uniform(0.0, 1.0) < settings::worm::counter_to_single_ratio))
+                                    || rnd::uniform_unit() < settings::worm::counter_to_single_ratio))
             || (bonds.at(cb) == 0 &&
-                ((bonds.at(other_color(cb)) == 0 && rnd::uniform(0.0, 1.0) < settings::sim::single_weight)
-                 || (bonds.at(other_color(cb)) == 1 && rnd::uniform(0.0, 1.0) < settings::worm::single_to_counter_ratio)))
+                ((bonds.at(other_color(cb)) == 0 && rnd::uniform_unit() < settings::sim::single_weight)
+                 || (bonds.at(other_color(cb)) == 1 && rnd::uniform_unit() < settings::worm::single_to_counter_ratio)))
         )
         {
             m_bonds.at(p).at(dir).at(cb) -= 1;
@@ -160,7 +160,7 @@ void state::State::try_to_add_bond(int dir) {
     else {
         if (
             (bonds.at(cf) == -1 || bonds.at(cb) == 1)
-            || (bonds.at(cf) == 0 && bonds.at(cb) == 0 && rnd::uniform(0.0, 1.0) < settings::sim::counter_weight )
+            || (bonds.at(cf) == 0 && bonds.at(cb) == 0 && rnd::uniform_unit() < settings::sim::counter_weight )
         )
         {
             m_bonds.at(p).at(dir).at(cf) += 1;
@@ -179,14 +179,14 @@ void state::State::try_to_add_bond(int dir) {
 
 void state::State::relocate_worm() {
     if (worm_head != worm_tail) throw sim::SimulationException("Error: tried relocating the worm, but the head and tail are not in the same position.");
-    const int new_pos = rnd::uniform(0, settings::sim::size_x*settings::sim::size_y - 1);
+    const int new_pos = rnd::uniform_loc();
     worm_head = new_pos;
     worm_tail = new_pos;
 }
 
 void state::State::recolor_worm() {
     if (worm_head != worm_tail) throw sim::SimulationException("Error: tried recoloring the worm, but the head and tail are not in the same position.");
-    switch (rnd::uniform(0, 5)) {
+    switch (rnd::uniform_color()) {
         case 0:
             worm_color_forward = 0;
             worm_color_backward = -1;
@@ -215,9 +215,9 @@ void state::State::recolor_worm() {
 }
 
 void state::State::try_to_move_worm() {
-    if (worm_head == worm_tail && rnd::uniform(0.0, 1.0) < settings::worm::p_move) relocate_worm();
-    if (worm_head == worm_tail && rnd::uniform(0.0, 1.0) < settings::worm::p_type) recolor_worm();
-    int dir = rnd::uniform(0, 3);
+    if (worm_head == worm_tail && rnd::uniform_unit() < settings::worm::p_move) relocate_worm();
+    if (worm_head == worm_tail && rnd::uniform_unit() < settings::worm::p_type) recolor_worm();
+    int dir = rnd::uniform_dir();
     try_to_add_bond(dir);
 }
 
