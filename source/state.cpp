@@ -121,12 +121,13 @@ void state::State::try_to_add_bond(int dir) {
     int cb = worm_color_backward;
     auto bonds = m_bonds.at(p).at(dir);
     if (cb == -1) {
+        double roll = rnd::uniform_unit();
         if (
             (bonds.at(cf) == -1 && (bonds.at(other_color(cf)) == 0
-            || rnd::uniform_unit() < settings::worm::counter_to_single_ratio))
+            || roll < settings::worm::counter_to_single_ratio))
             || (bonds.at(cf) == 0 &&
-            ((bonds.at(other_color(cf)) == 0 && rnd::uniform_unit() < settings::sim::single_weight)
-            || (bonds.at(other_color(cf)) == -1 && rnd::uniform_unit() < settings::worm::single_to_counter_ratio)))
+            ((bonds.at(other_color(cf)) == 0 && roll < settings::sim::single_weight)
+            || (bonds.at(other_color(cf)) == -1 && roll < settings::worm::single_to_counter_ratio)))
         )
         {
             m_bonds.at(p).at(dir).at(cf) += 1;
@@ -139,12 +140,13 @@ void state::State::try_to_add_bond(int dir) {
         }
     }
     else if (cf == -1) {
+        double roll = rnd::uniform_unit();
         if (
             (bonds.at(cb) == 1 && (bonds.at(other_color(cb)) == 0
-                                    || rnd::uniform_unit() < settings::worm::counter_to_single_ratio))
+                                    || roll < settings::worm::counter_to_single_ratio))
             || (bonds.at(cb) == 0 &&
-                ((bonds.at(other_color(cb)) == 0 && rnd::uniform_unit() < settings::sim::single_weight)
-                 || (bonds.at(other_color(cb)) == 1 && rnd::uniform_unit() < settings::worm::single_to_counter_ratio)))
+                ((bonds.at(other_color(cb)) == 0 && roll < settings::sim::single_weight)
+                 || (bonds.at(other_color(cb)) == 1 && roll < settings::worm::single_to_counter_ratio)))
         )
         {
             m_bonds.at(p).at(dir).at(cb) -= 1;
