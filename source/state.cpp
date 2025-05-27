@@ -120,7 +120,7 @@ void state::State::try_to_add_bond(int dir) {
     Point p = worm_head;
     int cf = worm_color_forward;
     int cb = worm_color_backward;
-    auto bonds = m_bonds.at(p).at(dir);
+    auto &bonds = m_bonds.at(p).at(dir);
     if (cb == -1) {
         double roll = rnd::uniform_unit();
         if (
