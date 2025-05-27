@@ -31,7 +31,7 @@ Point state::point_id(int x, int y) {
 }
 
 state::Lattice::Lattice()
-    : m_neighbours(settings::sim::size_x*settings::sim::size_y, std::vector<Point>(4))
+    : m_neighbors(4*settings::sim::size_x*settings::sim::size_y)
     , m_coords(settings::sim::size_x*settings::sim::size_y)
 {
      const int size_x = settings::sim::size_x;
@@ -41,16 +41,17 @@ state::Lattice::Lattice()
         for (int iy = 0 ; iy < size_y ; iy ++) {
             const Point point = point_id(ix, iy);
             m_coords.at(point) = {ix, iy};
-            m_neighbours.at(point).at(0) = point_id((ix + 1 + size_x) % size_x , iy);
-            m_neighbours.at(point).at(1) = point_id(ix                       , (iy + 1 + size_y) % size_y);
-            m_neighbours.at(point).at(2) = point_id((ix - 1 + size_x) % size_x , iy);
-            m_neighbours.at(point).at(3) = point_id(ix                       , (iy - 1 + size_y) % size_y);
+            m_neighbors.at(4*point + 0) = point_id((ix + 1 + size_x) % size_x , iy);
+            m_neighbors.at(4*point + 1) = point_id(ix                       , (iy + 1 + size_y) % size_y);
+            m_neighbors.at(4*point + 2) = point_id((ix - 1 + size_x) % size_x , iy);
+            m_neighbors.at(4*point + 3) = point_id(ix                       , (iy - 1 + size_y) % size_y);
         }
      }
 }
 
-std::vector<state::Point> &state::Lattice::get_neighbours(const Point p) {
-    return m_neighbours.at(p);
+state::Point state::Lattice::get_neighbor(const Point p, const int i) const {
+    assert(0 <= i && i < 4);
+    return m_neighbors.at(4*p + i);
 }
 
 state::Coord state::Lattice::get_coordinates(const Point p) {
@@ -131,7 +132,7 @@ void state::State::try_to_add_bond(int dir) {
         )
         {
             m_bonds.at(p).at(dir).at(cf) += 1;
-            const Point p_opposite = m_lattice.get_neighbours(p).at(dir);
+            const Point p_opposite = m_lattice.get_neighbor(p, dir);
             m_bonds.at(p_opposite).at(opposite_direction(dir)).at(cf) -= 1;
             if (settings::save::windings) {
                 m_winding_numbers.at(cf).at(absolute_direction(dir)) += direction_sign(dir);
@@ -150,7 +151,7 @@ void state::State::try_to_add_bond(int dir) {
         )
         {
             m_bonds.at(p).at(dir).at(cb) -= 1;
-            const Point p_opposite = m_lattice.get_neighbours(p).at(dir);
+            const Point p_opposite = m_lattice.get_neighbor(p, dir);
             m_bonds.at(p_opposite).at(opposite_direction(dir)).at(cb) += 1;
             if (settings::save::windings) {
                 m_winding_numbers.at(cb).at(absolute_direction(dir)) -= direction_sign(dir);
@@ -167,7 +168,7 @@ void state::State::try_to_add_bond(int dir) {
         {
             m_bonds.at(p).at(dir).at(cf) += 1;
             m_bonds.at(p).at(dir).at(cb) -= 1;
-            const Point p_opposite = m_lattice.get_neighbours(p).at(dir);
+            const Point p_opposite = m_lattice.get_neighbor(p, dir);
             m_bonds.at(p_opposite).at(opposite_direction(dir)).at(cf) -= 1;
             m_bonds.at(p_opposite).at(opposite_direction(dir)).at(cb) += 1;
             if (settings::save::windings) {
