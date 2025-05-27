@@ -140,6 +140,7 @@ void state::State::try_to_add_bond(int dir) {
             worm_head = p_opposite;
         }
     }
+
     else if (cf == -1) {
         double roll = rnd::uniform_unit();
         if (
