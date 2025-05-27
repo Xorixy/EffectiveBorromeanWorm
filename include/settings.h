@@ -20,8 +20,8 @@ namespace settings {
         inline int size_y = 5;
 
         //Number of simulation/thermalization steps
-        inline long long unsigned int n_steps = 10;
-        inline long long unsigned int n_therm = 10;
+        inline long long unsigned int n_steps = 100000000;
+        inline long long unsigned int n_therm = 100000000;
 
         //Weight of single/counterflow bond
         inline double single_weight = 0.5;
