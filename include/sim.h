@@ -6,6 +6,7 @@
 #include "io.h"
 #include <chrono>
 #include <fmt/core.h>
+#include <array>
 
 namespace sim {
 
