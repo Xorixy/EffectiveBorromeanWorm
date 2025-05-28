@@ -185,10 +185,10 @@ for l in range(n_systems):
     part_f_therm = np.mean(part_f.astype(np.float64), axis=0)
     part_f_therm[1:] -= part_f_therm[0:-1]
 
-    windings_diff_therm_x[l] /= part_f_therm
-    windings_sum_therm_x[l] /= part_f_therm
-    windings_diff_therm_y[l] /= part_f_therm
-    windings_sum_therm_y[l] /= part_f_therm
+    windings_diff_therm_x[l] = windings_diff_therm_x[l]/part_f_therm
+    windings_sum_therm_x[l] = windings_sum_therm_x[l]/part_f_therm
+    windings_diff_therm_y[l] = windings_diff_therm_y[l]/part_f_therm
+    windings_sum_therm_y[l] = windings_sum_therm_y[l]/part_f_therm
 
     windings_diff_arr_x[l] = np.mean((windings_diff_s_x / part_f).astype(np.float64), axis=0)
     windings_diff_arr_x_s[l] = np.std((windings_diff_s_x / part_f).astype(np.float64), axis=0)
