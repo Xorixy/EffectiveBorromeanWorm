@@ -70,5 +70,6 @@ namespace state {
             std::pair<long long, long long> get_winding_sum_square();
             Coord get_coords(Point p);
             void print_windings();
+            [[nodiscard]] std::vector<std::vector<long long int>> const & get_winding_numbers() const;
     };
 }

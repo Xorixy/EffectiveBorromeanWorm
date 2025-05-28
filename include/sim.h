@@ -16,6 +16,7 @@ namespace sim {
         simple_uint128 windings_difference_squared_y { 0 };
         long long unsigned int partition_function { 0 };
         long long unsigned int annulus_sum { 0 };
+        std::array<long long int, 4> windings { 0,0,0,0 };
     };
 
     struct TimeSeriesStruct {
@@ -25,7 +26,7 @@ namespace sim {
         simple_uint128_vec windings_difference_squared_y;
         std::vector<long long unsigned int> partition_function;
         std::vector<long long unsigned int> annulus_sum;
-
+        std::vector<std::array<long long int, 4>> windings;
         TimeSeriesStruct();
         void add_slice(const SaveStruct &save);
     };

@@ -374,3 +374,7 @@ Coord state::State::get_coords(state::Point p) {
 void state::State::print_windings() {
     fmt::print("WINDINGS: C1 UP = {}, C1 LEFT = {}, C2 UP = {}, C2 LEFT = {}\n", m_winding_numbers.at(0).at(0), m_winding_numbers.at(0).at(1),m_winding_numbers.at(1).at(0), m_winding_numbers.at(1).at(1));
 }
+
+std::vector<std::vector<long long int>> const & state::State::get_winding_numbers() const {
+    return m_winding_numbers;
+}
