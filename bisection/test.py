@@ -1,1 +1,1 @@
-f = open("myfile.txt", "x")
+f = open("out/myfile.txt", "x")
