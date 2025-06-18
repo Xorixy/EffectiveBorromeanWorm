@@ -95,5 +95,6 @@ class BatchScript:
         except Exception as e:
             print("Script failed to launch")
             print(e)
+        print(out)
         os.remove(f'{self.job_name}.slurm')
         return out
