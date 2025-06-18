@@ -31,7 +31,7 @@ Point state::point_id(int x, int y) {
 }
 
 state::Lattice::Lattice()
-    : m_neighbours(settings::sim::size_x*settings::sim::size_y, std::vector<Point>(4))
+    : m_neighbors(4*settings::sim::size_x*settings::sim::size_y)
     , m_coords(settings::sim::size_x*settings::sim::size_y)
 {
      const int size_x = settings::sim::size_x;
@@ -41,16 +41,17 @@ state::Lattice::Lattice()
         for (int iy = 0 ; iy < size_y ; iy ++) {
             const Point point = point_id(ix, iy);
             m_coords.at(point) = {ix, iy};
-            m_neighbours.at(point).at(0) = point_id((ix + 1 + size_x) % size_x , iy);
-            m_neighbours.at(point).at(1) = point_id(ix                       , (iy + 1 + size_y) % size_y);
-            m_neighbours.at(point).at(2) = point_id((ix - 1 + size_x) % size_x , iy);
-            m_neighbours.at(point).at(3) = point_id(ix                       , (iy - 1 + size_y) % size_y);
+            m_neighbors.at(4*point + 0) = point_id((ix + 1 + size_x) % size_x , iy);
+            m_neighbors.at(4*point + 1) = point_id(ix                       , (iy + 1 + size_y) % size_y);
+            m_neighbors.at(4*point + 2) = point_id((ix - 1 + size_x) % size_x , iy);
+            m_neighbors.at(4*point + 3) = point_id(ix                       , (iy - 1 + size_y) % size_y);
         }
      }
 }
 
-std::vector<state::Point> &state::Lattice::get_neighbours(const Point p) {
-    return m_neighbours.at(p);
+state::Point state::Lattice::get_neighbor(const Point p, const int i) const {
+    assert(0 <= i && i < 4);
+    return m_neighbors.at(4*p + i);
 }
 
 state::Coord state::Lattice::get_coordinates(const Point p) {
@@ -119,18 +120,19 @@ void state::State::try_to_add_bond(int dir) {
     Point p = worm_head;
     int cf = worm_color_forward;
     int cb = worm_color_backward;
-    auto bonds = m_bonds.at(p).at(dir);
+    auto &bonds = m_bonds.at(p).at(dir);
     if (cb == -1) {
+        double roll = rnd::uniform_unit();
         if (
             (bonds.at(cf) == -1 && (bonds.at(other_color(cf)) == 0
-            || rnd::uniform(0.0, 1.0) < settings::worm::counter_to_single_ratio))
+            || roll < settings::worm::counter_to_single_ratio))
             || (bonds.at(cf) == 0 &&
-            ((bonds.at(other_color(cf)) == 0 && rnd::uniform(0.0, 1.0) < settings::sim::single_weight)
-            || (bonds.at(other_color(cf)) == -1 && rnd::uniform(0.0, 1.0) < settings::worm::single_to_counter_ratio)))
+            ((bonds.at(other_color(cf)) == 0 && roll < settings::sim::single_weight)
+            || (bonds.at(other_color(cf)) == -1 && roll < settings::worm::single_to_counter_ratio)))
         )
         {
             m_bonds.at(p).at(dir).at(cf) += 1;
-            const Point p_opposite = m_lattice.get_neighbours(p).at(dir);
+            const Point p_opposite = m_lattice.get_neighbor(p, dir);
             m_bonds.at(p_opposite).at(opposite_direction(dir)).at(cf) -= 1;
             if (settings::save::windings) {
                 m_winding_numbers.at(cf).at(absolute_direction(dir)) += direction_sign(dir);
@@ -138,17 +140,19 @@ void state::State::try_to_add_bond(int dir) {
             worm_head = p_opposite;
         }
     }
+
     else if (cf == -1) {
+        double roll = rnd::uniform_unit();
         if (
             (bonds.at(cb) == 1 && (bonds.at(other_color(cb)) == 0
-                                    || rnd::uniform(0.0, 1.0) < settings::worm::counter_to_single_ratio))
+                                    || roll < settings::worm::counter_to_single_ratio))
             || (bonds.at(cb) == 0 &&
-                ((bonds.at(other_color(cb)) == 0 && rnd::uniform(0.0, 1.0) < settings::sim::single_weight)
-                 || (bonds.at(other_color(cb)) == 1 && rnd::uniform(0.0, 1.0) < settings::worm::single_to_counter_ratio)))
+                ((bonds.at(other_color(cb)) == 0 && roll < settings::sim::single_weight)
+                 || (bonds.at(other_color(cb)) == 1 && roll < settings::worm::single_to_counter_ratio)))
         )
         {
             m_bonds.at(p).at(dir).at(cb) -= 1;
-            const Point p_opposite = m_lattice.get_neighbours(p).at(dir);
+            const Point p_opposite = m_lattice.get_neighbor(p, dir);
             m_bonds.at(p_opposite).at(opposite_direction(dir)).at(cb) += 1;
             if (settings::save::windings) {
                 m_winding_numbers.at(cb).at(absolute_direction(dir)) -= direction_sign(dir);
@@ -160,12 +164,12 @@ void state::State::try_to_add_bond(int dir) {
     else {
         if (
             (bonds.at(cf) == -1 || bonds.at(cb) == 1)
-            || (bonds.at(cf) == 0 && bonds.at(cb) == 0 && rnd::uniform(0.0, 1.0) < settings::sim::counter_weight )
+            || (bonds.at(cf) == 0 && bonds.at(cb) == 0 && rnd::uniform_unit() < settings::sim::counter_weight )
         )
         {
             m_bonds.at(p).at(dir).at(cf) += 1;
             m_bonds.at(p).at(dir).at(cb) -= 1;
-            const Point p_opposite = m_lattice.get_neighbours(p).at(dir);
+            const Point p_opposite = m_lattice.get_neighbor(p, dir);
             m_bonds.at(p_opposite).at(opposite_direction(dir)).at(cf) -= 1;
             m_bonds.at(p_opposite).at(opposite_direction(dir)).at(cb) += 1;
             if (settings::save::windings) {
@@ -179,14 +183,14 @@ void state::State::try_to_add_bond(int dir) {
 
 void state::State::relocate_worm() {
     if (worm_head != worm_tail) throw sim::SimulationException("Error: tried relocating the worm, but the head and tail are not in the same position.");
-    const int new_pos = rnd::uniform(0, settings::sim::size_x*settings::sim::size_y - 1);
+    const int new_pos = rnd::uniform_loc();
     worm_head = new_pos;
     worm_tail = new_pos;
 }
 
 void state::State::recolor_worm() {
     if (worm_head != worm_tail) throw sim::SimulationException("Error: tried recoloring the worm, but the head and tail are not in the same position.");
-    switch (rnd::uniform(0, 5)) {
+    switch (rnd::uniform_color()) {
         case 0:
             worm_color_forward = 0;
             worm_color_backward = -1;
@@ -215,9 +219,9 @@ void state::State::recolor_worm() {
 }
 
 void state::State::try_to_move_worm() {
-    if (worm_head == worm_tail && rnd::uniform(0.0, 1.0) < settings::worm::p_move) relocate_worm();
-    if (worm_head == worm_tail && rnd::uniform(0.0, 1.0) < settings::worm::p_type) recolor_worm();
-    int dir = rnd::uniform(0, 3);
+    if (worm_head == worm_tail && rnd::uniform_unit() < settings::worm::p_move) relocate_worm();
+    if (worm_head == worm_tail && rnd::uniform_unit() < settings::worm::p_type) recolor_worm();
+    int dir = rnd::uniform_dir();
     try_to_add_bond(dir);
 }
 
@@ -369,4 +373,8 @@ Coord state::State::get_coords(state::Point p) {
 
 void state::State::print_windings() {
     fmt::print("WINDINGS: C1 UP = {}, C1 LEFT = {}, C2 UP = {}, C2 LEFT = {}\n", m_winding_numbers.at(0).at(0), m_winding_numbers.at(0).at(1),m_winding_numbers.at(1).at(0), m_winding_numbers.at(1).at(1));
+}
+
+std::vector<std::vector<long long int>> const & state::State::get_winding_numbers() const {
+    return m_winding_numbers;
 }

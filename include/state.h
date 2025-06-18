@@ -24,11 +24,11 @@ namespace state {
 
     class Lattice {
         private:
-            std::vector<std::vector<Point>> m_neighbours;
+            std::vector<Point> m_neighbors;
             std::vector<Coord> m_coords;
         public:
             Lattice();
-            [[nodiscard]] std::vector<Point>& get_neighbours(Point p);
+            [[nodiscard]] Point get_neighbor(Point p, int i) const;
             [[nodiscard]] Coord get_coordinates(Point p);
     };
     class Annulus {
@@ -70,5 +70,6 @@ namespace state {
             std::pair<long long, long long> get_winding_sum_square();
             Coord get_coords(Point p);
             void print_windings();
+            [[nodiscard]] std::vector<std::vector<long long int>> const & get_winding_numbers() const;
     };
 }

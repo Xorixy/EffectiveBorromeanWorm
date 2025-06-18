@@ -16,12 +16,12 @@ namespace settings {
 
     namespace sim {
         //System sizes
-        inline int size_x = 5;
-        inline int size_y = 5;
+        inline int size_x = 50;
+        inline int size_y = 50;
 
         //Number of simulation/thermalization steps
-        inline long long unsigned int n_steps = 10;
-        inline long long unsigned int n_therm = 10;
+        inline long long unsigned int n_steps = 200000000;
+        inline long long unsigned int n_therm = 200000000;
 
         //Weight of single/counterflow bond
         inline double single_weight = 0.5;
@@ -30,7 +30,7 @@ namespace settings {
 
     namespace save {
         //Winding numbers
-        inline bool windings = false;
+        inline bool windings = true;
 
 
         //Correlations are saved averaged over an annulus
@@ -41,8 +41,10 @@ namespace settings {
 
         //Whether to save the simulation as a time series,
         //and at what step interval the time series should be saved
-        inline bool time_series = false;
+        inline bool time_series = true;
         inline int save_interval = 10000;
+
+        inline bool therm_windings = true;
     }
 
     namespace io {

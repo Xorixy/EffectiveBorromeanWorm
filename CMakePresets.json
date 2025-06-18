@@ -79,8 +79,9 @@
         "CMAKE_INTERPROCEDURAL_OPTIMIZATION": "TRUE",
         "CMAKE_C_COMPILER": "icc",
         "CMAKE_CXX_COMPILER": "icpc",
-        "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG -march=native -mtune=native -ip",
-        "CMAKE_CXX_COMPILER_VERSION": "2021.9"
+        "CMAKE_CXX_FLAGS_RELEASE": "-O3 -DNDEBUG -march=native -mtune=native -ip -qmkl=sequential",
+        "CMAKE_CXX_COMPILER_VERSION": "2021.9",
+	"EFFBORR_INTEL_MKL": "TRUE"
       }
     },
     {

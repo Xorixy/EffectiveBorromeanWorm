@@ -8,6 +8,8 @@
 #include "../include/log.h"
 #include <thread>
 #include <chrono>
+#include <array>
+
 
 namespace sim {
     struct SaveStruct;

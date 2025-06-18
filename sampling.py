@@ -60,6 +60,12 @@ WINDING_SUM_X_RES_LOC = '/results/windings_sum_squared_x'
 WINDING_SUM_X_RES_STD_LOC = '/results/windings_sum_squared_x_std'
 WINDING_SUM_Y_RES_LOC = '/results/windings_sum_squared_y'
 WINDING_SUM_Y_RES_STD_LOC = '/results/windings_sum_squared_y_std'
+WINDING_DIFF_X_THERM_LOC = '/results/windings_diff_squared_therm_x'
+WINDING_DIFF_Y_THERM_LOC = '/results/windings_diff_squared_therm_y'
+WINDING_SUM_X_THERM_LOC = '/results/windings_sum_squared_therm_x'
+WINDING_SUM_Y_THERM_LOC = '/results/windings_sum_squared_therm_y'
+
+
 
 parser = arg.ArgumentParser(prog = 'BorromeanWorms')
 parser.add_argument('-fn', '--file_name', help='sourse of the data', required=True)
@@ -115,6 +121,11 @@ windings_diff_arr_y_s = np.zeros((n_systems, number_of_steps))
 windings_sum_arr_y = np.zeros((n_systems, number_of_steps))
 windings_sum_arr_y_s = np.zeros((n_systems, number_of_steps))
 
+windings_diff_therm_x = np.zeros((n_systems, number_of_steps))
+windings_diff_therm_y = np.zeros((n_systems, number_of_steps))
+windings_sum_therm_x = np.zeros((n_systems, number_of_steps))
+windings_sum_therm_y = np.zeros((n_systems, number_of_steps))
+
 for l in range(n_systems):
     curr_folder = sorted(os.listdir(foldername + '/' + folder_names[l]))
     n_samples = len(curr_folder) - 1
@@ -161,6 +172,27 @@ for l in range(n_systems):
     annulus_arr[l] = np.mean(ann_sum / part_f, axis=0) / annulus_area
     annulus_arr_s[l] = np.std(ann_sum / part_f, axis=0) / annulus_area
 
+    windings_diff_therm_x[l] = np.mean(windings_diff_s_x.astype(np.float64), axis=0)
+    windings_diff_therm_y[l] = np.mean(windings_diff_s_y.astype(np.float64), axis=0)
+    windings_sum_therm_x[l] = np.mean(windings_sum_s_x.astype(np.float64), axis=0)
+    windings_sum_therm_y[l] = np.mean(windings_sum_s_y.astype(np.float64), axis=0)
+
+    windings_diff_therm_x[l][1:] -= windings_diff_therm_x[l][:-1]
+    windings_diff_therm_y[l][1:] -= windings_diff_therm_y[l][:-1]
+    windings_sum_therm_x[l][1:] -= windings_sum_therm_x[l][:-1]
+    windings_sum_therm_y[l][1:] -= windings_sum_therm_y[l][:-1]
+
+    part_f_therm = np.mean(part_f.astype(np.float64), axis=0)
+    part_f_therm[1:] -= part_f_therm[0:-1]
+    for i in range(len(part_f_therm)):
+        if part_f_therm[i] == 0:
+            part_f_therm[i] = 1
+
+    windings_diff_therm_x[l] = windings_diff_therm_x[l]/part_f_therm
+    windings_sum_therm_x[l] = windings_sum_therm_x[l]/part_f_therm
+    windings_diff_therm_y[l] = windings_diff_therm_y[l]/part_f_therm
+    windings_sum_therm_y[l] = windings_sum_therm_y[l]/part_f_therm
+
     windings_diff_arr_x[l] = np.mean((windings_diff_s_x / part_f).astype(np.float64), axis=0)
     windings_diff_arr_x_s[l] = np.std((windings_diff_s_x / part_f).astype(np.float64), axis=0)
     windings_diff_arr_y[l] = np.mean((windings_diff_s_y / part_f).astype(np.float64), axis=0)
@@ -198,7 +230,12 @@ with h5.File(dist_name, "w") as dist_file:
 
     dist_file[WINDING_SUM_Y_RES_LOC] = windings_sum_arr_y
     dist_file[WINDING_SUM_Y_RES_STD_LOC] = windings_sum_arr_y_s
-    
+
+    dist_file[WINDING_DIFF_X_THERM_LOC] = windings_diff_therm_x
+    dist_file[WINDING_SUM_X_THERM_LOC] = windings_sum_therm_x
+    dist_file[WINDING_DIFF_Y_THERM_LOC] = windings_diff_therm_y
+    dist_file[WINDING_SUM_Y_THERM_LOC] = windings_sum_therm_y
+
     dist_file.create_dataset(SIM_LOC, data=location)
     dist_file.create_dataset(SIM_PARAMS_LOC, data=sim_params_string)
 

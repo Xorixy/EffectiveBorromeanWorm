@@ -52,6 +52,12 @@ target_link_libraries(effborr-libs INTERFACE pcg-cpp::pcg-cpp )
 target_link_libraries(effborr-libs INTERFACE nanobench::nanobench)
 target_link_libraries(effborr-libs INTERFACE CLI11::CLI11)
 
+## Intel MKL
+if (EFFBORR_INTEL_MKL)
+    find_package(MKL CONFIG REQUIRED PATHS $ENV{MKLROOT})
+    target_link_libraries(effborr-libs INTERFACE MKL::MKL)
+endif()
+
 
 ### Link targets to the main executable
 target_link_libraries(EFFBORR PUBLIC effborr-libs)
@@ -87,3 +93,4 @@ if(EFFBORR_CMAKE_DEBUG)
     include(cmake/PrintTargetInfo.cmake)
     print_and_write_project_summary(EFFBORR)
 endif()
+
