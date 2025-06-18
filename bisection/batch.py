@@ -14,6 +14,7 @@ class BatchScript:
         self.command = None
         self.memory = None
         self.reservation = None
+        self.dependency = None
         self.nodes = 1
         self.ntasks = 1
         self.cpu_per_task = 1
@@ -59,6 +60,9 @@ class BatchScript:
     def set_cpu_per_task(self, cpu_per_task):
         self.cpu_per_task = cpu_per_task
 
+    def set_dependency(self, dependency):
+        self.dependency = dependency
+
     def create_batch_script(self):
         if self.job_name is None or self.command is None or self.run_time is None or self.output_name is None:
             raise Exception("Error, not all required parameters are set")
@@ -79,7 +83,6 @@ class BatchScript:
                 script.write(f"#SBATCH --mem={self.memory}\n")
             if self.openmp is True:
                 script.write("export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK\n")
-
             script.write(self.command)
 
     def run_batch(self):
@@ -91,8 +94,13 @@ class BatchScript:
             return
         out = None
         try:
-            out = subprocess.run(["sbatch", f'{self.job_name}.slurm'], capture_output=True)
+            dep_string = ""
+            if self.dependency is not None:
+                out = subprocess.run(["sbatch", f'-dependency={self.dependency} {self.job_name}.slurm'], capture_output=True)
+            else:
+                out = subprocess.run(["sbatch", f'{self.job_name}.slurm'], capture_output=True)
             out = out.stdout.decode()
+            print(out)
             if out[0:20] != "Submitted batch job ":
                 print("Unexpected string")
                 out = None
