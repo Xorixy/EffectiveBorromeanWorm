@@ -1,5 +1,5 @@
 import time
-time.sleep(30)
+time.sleep(10)
 try:
     f = open("out/myfile1.txt", "x")
 except Exception as e:

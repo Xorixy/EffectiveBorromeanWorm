@@ -96,7 +96,7 @@ class BatchScript:
         try:
             dep_string = ""
             if self.dependency is not None:
-                out = subprocess.run(["sbatch", f'-dependency={self.dependency} {self.job_name}.slurm'], capture_output=True)
+                out = subprocess.run(["sbatch", f'-dependency={self.dependency}', f'{self.job_name}.slurm'], capture_output=True)
             else:
                 out = subprocess.run(["sbatch", f'{self.job_name}.slurm'], capture_output=True)
             out = out.stdout.decode()
