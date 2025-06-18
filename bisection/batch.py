@@ -99,8 +99,9 @@ class BatchScript:
                 out = subprocess.run(["sbatch", f'-dependency={self.dependency}', f'{self.job_name}.slurm'], capture_output=True)
             else:
                 out = subprocess.run(["sbatch", f'{self.job_name}.slurm'], capture_output=True)
+            print(out.stdout.decode())
+            print(out.stderr.decode())
             out = out.stdout.decode()
-            print(out)
             if out[0:20] != "Submitted batch job ":
                 print("Unexpected string")
                 out = None
