@@ -97,7 +97,7 @@ class BatchScript:
             print(out[0:20])
             print(out[0:19])
             print(out[0:18])
-            if out[0:20] is not "Submitted batch job ":
+            if out[0:20] != "Submitted batch job ":
                 print("Unexpected string")
                 out = None
 
