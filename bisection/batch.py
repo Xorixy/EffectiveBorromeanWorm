@@ -19,6 +19,7 @@ class BatchScript:
         self.ntasks = 1
         self.cpu_per_task = 1
         self.openmp = False
+        self.verbose = False
 
     def set_job_name(self, job_name):
         self.job_name = job_name
@@ -63,6 +64,9 @@ class BatchScript:
     def set_dependency(self, dependency):
         self.dependency = dependency
 
+    def set_verbose(self, verbose):
+        self.verbose = verbose
+
     def create_batch_script(self):
         if self.job_name is None or self.command is None or self.run_time is None or self.output_name is None:
             raise Exception("Error, not all required parameters are set")
@@ -99,8 +103,9 @@ class BatchScript:
                 out = subprocess.run(["sbatch", f'--dependency={self.dependency}', f'{self.job_name}.slurm'], capture_output=True)
             else:
                 out = subprocess.run(["sbatch", f'{self.job_name}.slurm'], capture_output=True)
-            print(out.stdout.decode())
-            print(out.stderr.decode())
+            if self.verbose is True:
+                print(out.stdout.decode())
+                print(out.stderr.decode())
             out = out.stdout.decode()
             if out[0:20] != "Submitted batch job ":
                 print("Unexpected string")
