@@ -1,1 +1,1 @@
-f = open("~/Worm/EffectiveBorromeanWorm/bisection/myfile.txt", "x")
+f = open("myfile.txt", "x")
