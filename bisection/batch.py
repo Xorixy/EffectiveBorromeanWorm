@@ -93,6 +93,11 @@ class BatchScript:
         try:
             out = subprocess.run(["sbatch", f'{self.job_name}.slurm'], capture_output=True)
             out = out.stdout.decode()
+            print(out[0:20])
+            if out[0:20] is not "Submitted batch job ":
+                print("Unexpected string")
+                out = None
+
         except Exception as e:
             print("Script failed to launch")
             print(e)
