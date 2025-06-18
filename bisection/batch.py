@@ -91,7 +91,7 @@ class BatchScript:
             return
         out = None
         try:
-            out = subprocess.run(["sbatch", f'{self.job_name}.slurm'])
+            out = subprocess.run(["sbatch", f'{self.job_name}.slurm'], capture_output=True)
         except Exception as e:
             print("Script failed to launch")
             print(e)
