@@ -70,7 +70,7 @@ def create_settings_file(settings_loc, size, P, chi, n_steps, n_therm, counter_c
         f["settings/save/annulus_size"] = np.float64(0.5)
         f["settings/save/save_interval"] = np.int32(1)
 
-def get_sim_result(outfile, n_sims):
+def get_sim_result(outfile, n_sims, size):
     part_f = np.zeros(n_sims)
     windings_diff_s_x = np.zeros(n_sims)
     windings_diff_s_y = np.zeros(n_sims)
@@ -88,15 +88,13 @@ def get_sim_result(outfile, n_sims):
             windings_diff_s_y[i] = (int(sim_file['/data/windings_diff_squared_y/big'][()]) * base +
                                     int(sim_file['/data/windings_diff_squared_y/small'][()]))
             windings_sum_s_y[i] = (int(sim_file['/data/windings_sum_squared_y/big'][()]) * base +
-                                   int(sim_file['/data/windings_sum_squared_y/big'][()]))
-    windings_diff_x = windings_diff_s_x / part_f
-    windings_sum_x = windings_sum_s_x / part_f
-    windings_diff_y = windings_diff_s_y / part_f
-    windings_sum_y = windings_sum_s_y / part_f
+                                   int(sim_file['/data/windings_sum_squared_y/small'][()]))
+    windings_diff_x = windings_diff_s_x / (part_f * size ** 2)
+    windings_sum_x = windings_sum_s_x / (part_f * size ** 2)
+    windings_diff_y = windings_diff_s_y / (part_f * size ** 2)
+    windings_sum_y = windings_sum_s_y / (part_f * size ** 2)
     windings_diff = np.append(windings_diff_x, windings_diff_y)
     windings_sum = np.append(windings_sum_x, windings_sum_y)
-    print(windings_diff)
-    print(windings_sum)
     diff_mean = np.mean(windings_diff)
     sum_mean = np.mean(windings_sum)
     diff_var = np.var(windings_diff, ddof=1) / n_sims
