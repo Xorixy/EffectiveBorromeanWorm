@@ -37,7 +37,8 @@ def bisection_step():
     print(p["sim_folder"])
     sim_folder = p["sim_folder"]
     n_sim = p["n_sim"]
-    print(get_sim_result(sim_folder + "/out", n_sim))
+    size = p["size"]
+    print(get_sim_result(sim_folder + "/out", n_sim, size))
 
 def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc):
     settings_loc = loc + "/settings.h5"
