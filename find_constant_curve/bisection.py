@@ -43,7 +43,8 @@ def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim,
     s.set_run_time(estimate_run_time(n_steps, n_therm))
     out_loc = loc + "/out"
     command = "." + exec_loc + " -s " + settings_loc + " -o " + out_loc + " --array"
-    print(command)
+    s.set_command(command)
+    s.run_batch()
 
 def create_settings_file(settings_loc, size, P, chi, n_steps, n_therm, counter_chi_factor):
     with h5.File(settings_loc, "w") as f:
