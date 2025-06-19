@@ -27,7 +27,7 @@ def start_bisection():
     n_sim = p["n_sim"]
     counter_chi_factor = p["counter_chi_factor"]
     exec = p["exec_loc"]
-    launch_array(sim_folder, size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim)
+    launch_array(sim_folder, size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec)
 
 def bisection_step():
     print("Bisection step")
