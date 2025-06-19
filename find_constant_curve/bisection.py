@@ -95,6 +95,8 @@ def get_sim_result(outfile, n_sims):
     windings_sum_y = windings_sum_s_y / part_f
     windings_diff = np.append(windings_diff_x, windings_diff_y)
     windings_sum = np.append(windings_sum_x, windings_sum_y)
+    print(windings_diff)
+    print(windings_sum)
     diff_mean = np.mean(windings_diff)
     sum_mean = np.mean(windings_sum)
     diff_var = np.var(windings_diff, ddof=1) / n_sims
