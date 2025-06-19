@@ -11,6 +11,6 @@
   "n_therm" : 1000,
   "n_steps" : 1000,
   "n_sim": 10,
-  "exec_loc": "/home/users/x_algol/Worm/EffectiveBorromeanWorm/build/release-conan/EFFBORR",
+  "exec_loc": "/EFFBORR",
   "counter_chi_factor" : 2
 }
