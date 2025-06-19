@@ -2,6 +2,7 @@
 
 void io::load_settings() {
     const h5pp::File s_file = try_to_open_file(settings::io::settings_path, true);
+    logger::log->info("File opened");
     s_file.readDataset<int>(settings::sim::size_x, "settings/sim/size_x");
     s_file.readDataset<int>(settings::sim::size_y, "settings/sim/size_y");
     s_file.readDataset<long long unsigned int>(settings::sim::n_steps, "settings/sim/n_steps");
