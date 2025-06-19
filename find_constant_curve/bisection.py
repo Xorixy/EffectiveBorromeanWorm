@@ -28,10 +28,16 @@ def start_bisection():
     n_sim = p["n_sim"]
     counter_chi_factor = p["counter_chi_factor"]
     exec = p["exec_loc"]
-    #launch_array(sim_folder, size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec)
-    print(get_sim_result(sim_folder, n_sim))
+    launch_array(sim_folder, size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec)
+
 def bisection_step():
     print("Bisection step")
+    with open(args.parameters) as f:
+        p = json.load(f)
+    print(p["sim_folder"])
+    sim_folder = p["sim_folder"]
+    n_sim = p["n_sim"]
+    print(get_sim_result(sim_folder + "/out", n_sim))
 
 def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc):
     settings_loc = loc + "/settings.h5"
@@ -115,7 +121,7 @@ start_parser.set_defaults(func = start_bisection)
 step_parser.set_defaults(func = bisection_step)
 
 start_parser.add_argument("-p", "--parameters", help="Path to parameter file", required = True)
-
+step_parser.add_argument("-p", "--parameters", help="Path to parameter file", required = True)
 
 args = parser.parse_args()
 print(args.parameters)
