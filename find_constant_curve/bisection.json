@@ -1,0 +1,16 @@
+{
+  "initial_P": 0.5,
+  "chi_max": 0.05,
+  "n_chi": 10,
+  "n_chi_parallel": 4,
+  "initial_width": 0.05,
+  "tol" : 1,
+  "two_sided" : true,
+  "sim_folder" : "/proj/vortex/users/x_algol/EffBorr/test_bisection",
+  "size" : 30,
+  "n_therm" : 1000,
+  "n_steps" : 1000,
+  "n_sim": 10,
+  "exec_loc": "/home/users/x_algol/Worm/EffectiveBorromeanWorm/build/release-conan/EFFBORR",
+  "counter_chi_factor" : 2
+}

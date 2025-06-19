@@ -30,7 +30,7 @@ namespace settings {
 
     namespace save {
         //Winding numbers
-        inline bool windings = true;
+        inline bool windings = false;
 
 
         //Correlations are saved averaged over an annulus
@@ -41,10 +41,10 @@ namespace settings {
 
         //Whether to save the simulation as a time series,
         //and at what step interval the time series should be saved
-        inline bool time_series = true;
+        inline bool time_series = false;
         inline int save_interval = 10000;
 
-        inline bool therm_windings = true;
+        inline bool therm_windings = false;
     }
 
     namespace io {
@@ -52,6 +52,7 @@ namespace settings {
         inline std::string settings_path = "settings.h5";
         //Probably want to set it to false in the final code.
         inline bool replace_file = true;
+        inline bool array = false;
     }
 
     namespace log {

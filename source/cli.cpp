@@ -12,6 +12,7 @@ int cli::parse(int argc, char *argv[]) {
     bool save_settings = false;
     bool debug = false;
 
+
     app.add_option("-n, --n_steps"          , settings::sim::n_steps, "Number of simulation steps");
     app.add_option("-t, --n_therm"          , settings::sim::n_therm, "Number of thermalization steps");
     app.add_option("-x, --size_x"           , settings::sim::size_x, "System size in the x direction");
@@ -27,6 +28,7 @@ int cli::parse(int argc, char *argv[]) {
     app.add_option("-r, --seed"              , settings::random::seed            , "Random number seed");
     app.add_option("-o, --filename"          , settings::io::filename     , "Path to the output file");
     app.add_option("-l, --loglevel"          , settings::log::level              , "Verbosity 0:high --> 6:off")->check(CLI::Range(0,6));
+    app.add_flag("--array", settings::io::array, "If true, then saves output according to slurm task id");
     app.add_flag("--save_settings_no_run", save_settings_no_run, "Saves the sim settings given here to the file corresponding to settings_path. Does not run simulation. Overrides debug.");
     app.add_flag("--save_settings_run", save_settings, "Saves the sim settings given here to the file corresponding to settings_path.");
     app.add_flag("--debug"          , debug, "Enters debug mode with the settings from the settings file.");
@@ -53,6 +55,17 @@ int cli::parse(int argc, char *argv[]) {
     logger::print_params();
 
     if (debug) return 2;
+    if (settings::io::array) {
+        if (auto task_id = std::getenv("SLURM_ARRAY_TASK_ID") ; task_id != nullptr) {
+            logger::log->info("SLURM_ARRAY_TASK_ID: {}", task_id);
+            logger::log->info("Seeding random with task id.");
+            settings::random::seed = std::stoi(task_id);
+            logger::log->info("Saving file as {}_{}.h5", settings::io::filename, task_id);
+            settings::io::filename += "_" + std::string(task_id) + ".h5";
+        } else {
+            logger::log->info("SLURM_ARRAY_TASK_ID not set");
+        }
+    }
 
     rnd::seed(settings::random::seed);
 
