@@ -41,6 +41,7 @@ def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim,
     s.set_array_end(n_sim)
     s.set_output_name(loc)
     s.set_run_time(estimate_run_time(n_steps, n_therm))
+    s.set_verbose(True)
     out_loc = loc + "/out"
     command = "." + exec_loc + " -s " + settings_loc + " -o " + out_loc + " --array"
     s.set_command(command)
