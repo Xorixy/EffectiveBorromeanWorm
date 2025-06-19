@@ -7,7 +7,7 @@ import json
 import shutil
 
 def estimate_run_time(n_steps, n_therm):
-    return 1000
+    return int(2*(n_steps + n_therm)/(10 ** 7)) + 10
 def start_bisection():
     print("Starting bisection")
     print("Reading parameter file...")
