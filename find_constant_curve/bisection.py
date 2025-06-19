@@ -61,6 +61,7 @@ def create_settings_file(settings_loc, size, P, chi, n_steps, n_therm, counter_c
         f["settings/sim/counter_weight"] = np.float64(P - counter_chi_factor*chi)
 
         f["settings/save/annulus_size"] = np.float64(0.5)
+        f["settings/save/time_series"] = np.int32(1)
 
 def get_chi_list(params):
     try:
