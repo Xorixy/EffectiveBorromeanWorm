@@ -44,7 +44,7 @@ int cli::parse(int argc, char *argv[]) {
             return 1;
         }
     }
-
+    logger::log->info("Settings file : {}", settings::io::settings_path);
     io::load_settings();
 
     settings::worm::single_to_counter_ratio = settings::sim::counter_weight/settings::sim::single_weight;
