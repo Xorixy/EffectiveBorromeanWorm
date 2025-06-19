@@ -79,16 +79,16 @@ def get_sim_result(outfile, n_sims):
     for i in range(n_sims):
         file_path = outfile + "_" + str(i + 1) + ".h5"
         with h5.File(file_path, "r") as sim_file:
-            base = np.array(sim_file['/constants/base_minus_one'], dtype=np.uint64).astype(dtype=object) + 1
-            part_f[i] = np.array(sim_file['/data/partition_function'], dtype=np.int64)
-            windings_diff_s_x[i] = (np.array(sim_file['/data/windings_diff_squared_x/big'], dtype=np.uint64) * base +
-                                    np.array(sim_file['/data/windings_diff_squared_x/small'], dtype=np.uint64))
-            windings_sum_s_x[i] = (np.array(sim_file['/data/windings_sum_squared_x/big'], dtype=np.uint64) * base +
-                                   np.array(sim_file['/data/windings_sum_squared_x/small'], dtype=np.uint64))
-            windings_diff_s_y[i] = (np.array(sim_file['/data/windings_diff_squared_y/big'], dtype=np.uint64) * base +
-                                    np.array(sim_file['/data/windings_diff_squared_y/small'], dtype=np.uint64))
-            windings_sum_s_y[i] = (np.array(sim_file['/data/windings_sum_squared_y/big'], dtype=np.uint64) * base +
-                                   np.array(sim_file['/data/windings_sum_squared_y/big'], dtype=np.uint64))
+            base = int(sim_file['/constants/base_minus_one'][()]) + 1
+            part_f[i] = int(sim_file['/data/partition_function'][()])
+            windings_diff_s_x[i] = (int(sim_file['/data/windings_diff_squared_x/big'][()]) * base +
+                                    int(sim_file['/data/windings_diff_squared_x/small'][()]))
+            windings_sum_s_x[i] = (int(sim_file['/data/windings_sum_squared_x/big'][()]) * base +
+                                   int(sim_file['/data/windings_sum_squared_x/small'][()]))
+            windings_diff_s_y[i] = (int(sim_file['/data/windings_diff_squared_y/big'][()]) * base +
+                                    int(sim_file['/data/windings_diff_squared_y/small'][()]))
+            windings_sum_s_y[i] = (int(sim_file['/data/windings_sum_squared_y/big'][()]) * base +
+                                   int(sim_file['/data/windings_sum_squared_y/big'][()]))
     windings_diff_x = windings_diff_s_x / part_f
     windings_sum_x = windings_sum_s_x / part_f
     windings_diff_y = windings_diff_s_y / part_f
