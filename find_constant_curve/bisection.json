@@ -6,7 +6,7 @@
   "initial_width": 0.05,
   "tol" : 1,
   "two_sided" : true,
-  "sim_folder" : "/proj/vortex/users/x_algol/EffBorr/test_bisection",
+  "sim_folder" : "/proj/vortex/users/x_algol/effborr/test_bisection",
   "size" : 30,
   "n_therm" : 1000,
   "n_steps" : 1000,
