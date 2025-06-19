@@ -33,7 +33,7 @@ def bisection_step():
     print("Bisection step")
 
 def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc):
-    settings_loc = loc + "/settings.json"
+    settings_loc = loc + "/settings.h5"
     create_settings_file(settings_loc, size, P, chi, n_steps, n_therm, counter_chi_factor)
     s = BatchScript()
     s.set_job_name("effborr-bisection")
