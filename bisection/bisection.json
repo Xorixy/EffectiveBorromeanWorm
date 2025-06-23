@@ -13,5 +13,5 @@
   "n_sim": 10,
   "exec_loc": "/EFFBORR",
   "counter_chi_factor" : 2,
-  "python_file" : "/home/users/x_algol/Worm/EffectiveBorromeanWorm/find_constant_curve/bisection.py"
+  "python_file" : "bisection.py"
 }
