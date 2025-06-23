@@ -13,5 +13,6 @@
   "n_sim": 10,
   "exec_loc": "/EFFBORR",
   "counter_chi_factor" : 2,
-  "python_file" : "bisection.py"
+  "python_file" : "bisection.py",
+  "batch_file" : "batch.py"
 }

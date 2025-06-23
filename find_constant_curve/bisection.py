@@ -24,9 +24,11 @@ def start_bisection():
     os.makedirs(sim_folder)
     print("Copying parameter file")
     shutil.copyfile(args.parameters, sim_folder + "/bisection.json")
-    print("Copying python file")
+    print("Copying python files")
     python_file = p["python_file"]
     shutil.copyfile(python_file, sim_folder + "/bisection.py")
+    batch_file = p["batch_file"]
+    shutil.copyfile(batch_file, sim_folder + "/batch.py")
     size = p["size"]
     P = p["initial_P"]
     n_steps = p["n_steps"]
