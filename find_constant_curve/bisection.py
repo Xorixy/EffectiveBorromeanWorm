@@ -36,9 +36,7 @@ def start_bisection():
     exec = p["exec_loc"]
     sym_id = launch_array(sim_folder, size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec)
     res = h5.File(sim_folder + "/result.h5", "x")
-    res.create_dataset("sym/id", data=sym_id)
-
-
+    launch_bisection_step(sym_id, sim_folder)
 def bisection_step():
     print("Bisection step")
 
@@ -49,6 +47,13 @@ def bisection_step():
     n_sim = p["n_sim"]
     size = p["size"]
     res = h5.File(sim_folder + "/result.h5", "r+")
+    S_mean, S_var = get_sim_result(sim_folder + "/sim", n_sim, size)
+    print("S_mean:", S_mean)
+    print("S_var:", S_var)
+    res.create_dataset("S_mean", data=S_mean)
+    res.create_dataset("S_var", data=S_var)
+
+
 
 
 def launch_bisection_step(prev_ids, sim_folder):
