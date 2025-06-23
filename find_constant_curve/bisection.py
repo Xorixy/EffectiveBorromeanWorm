@@ -49,7 +49,7 @@ def bisection_step():
     n_sim = p["n_sim"]
     size = p["size"]
     res = h5.File(sim_folder + "/result.h5", "r+")
-    S_mean, S_var = get_sim_result(sim_folder + "/sim", n_sim, size)
+    S_mean, S_var = get_sim_result(sim_folder + "/sim/out", n_sim, size)
     print("S_mean:", S_mean)
     print("S_var:", S_var)
     res.create_dataset("S_mean", data=S_mean)
