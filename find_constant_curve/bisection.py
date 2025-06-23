@@ -6,7 +6,10 @@ import argparse
 import json
 import shutil
 
-
+def get_S(single_stiffness, double_stiffness):
+    v = np.pi*single_stiffness - 2
+    w = double_stiffness - 2
+    return 8*v**2 + 5*w**2 - 4*v*w
 def estimate_run_time(n_steps, n_therm):
     return int(2*(n_steps + n_therm)/(10 ** 7)) + 10
 def start_bisection():
@@ -21,6 +24,9 @@ def start_bisection():
     os.makedirs(sim_folder)
     print("Copying parameter file")
     shutil.copyfile(args.parameters, sim_folder + "/bisection.json")
+    print("Copying python file")
+    python_file = p["python_file"]
+    shutil.copyfile(python_file, sim_folder + "/bisection.py")
     size = p["size"]
     P = p["initial_P"]
     n_steps = p["n_steps"]
@@ -28,17 +34,31 @@ def start_bisection():
     n_sim = p["n_sim"]
     counter_chi_factor = p["counter_chi_factor"]
     exec = p["exec_loc"]
-    launch_array(sim_folder, size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec)
+    sym_id = launch_array(sim_folder, size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec)
+    res = h5.File(sim_folder + "/result.h5", "x")
+    res.create_dataset("sym/id", data=sym_id)
+
 
 def bisection_step():
     print("Bisection step")
-    with open(args.parameters) as f:
+
+    with open(args.sim_folder + "/bisection.json") as f:
         p = json.load(f)
     print(p["sim_folder"])
     sim_folder = p["sim_folder"]
     n_sim = p["n_sim"]
     size = p["size"]
-    print(get_sim_result(sim_folder + "/out", n_sim, size))
+    res = h5.File(sim_folder + "/result.h5", "r+")
+
+
+def launch_bisection_step(prev_ids, sim_folder):
+    s = BatchScript()
+    s.set_job_name("effborr-bisection-step")
+    s.set_output_name(sim_folder)
+    s.set_run_time(3600)
+    s.set_verbose(True)
+    s.set_dependency(f"afterany:{prev_ids}")
+    s.set_command("python3 " + sim_folder + "/bisection.py" + " step " + "--sim_folder " + sim_folder)
 
 def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc):
     settings_loc = loc + "/settings.h5"
@@ -47,13 +67,27 @@ def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim,
     s.set_job_name("effborr-bisection")
     s.set_array_start(1)
     s.set_array_end(n_sim)
-    s.set_output_name(loc)
+    out_loc = loc
+    if os.path.isdir(loc + "/sim"):
+        for filename in os.listdir(out_loc):
+            file_path = os.path.join(out_loc, filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print('Failed to delete %s. Reason: %s' % (file_path, e))
+    else:
+        os.makedirs(out_loc)
+    s.set_output_name(out_loc)
     s.set_run_time(estimate_run_time(n_steps, n_therm))
     s.set_verbose(True)
-    out_loc = loc + "/out"
+
+    out_loc += "/out"
     command = "." + exec_loc + " -s " + settings_loc + " -o " + out_loc + " --array"
     s.set_command(command)
-    s.run_batch()
+    return s.run_batch()
 
 def create_settings_file(settings_loc, size, P, chi, n_steps, n_therm, counter_chi_factor):
     with h5.File(settings_loc, "w") as f:
@@ -90,17 +124,18 @@ def get_sim_result(outfile, n_sims, size):
                                     int(sim_file['/data/windings_diff_squared_y/small'][()]))
             windings_sum_s_y[i] = (int(sim_file['/data/windings_sum_squared_y/big'][()]) * base +
                                    int(sim_file['/data/windings_sum_squared_y/small'][()]))
-    windings_diff_x = windings_diff_s_x / (part_f * size ** 2)
-    windings_sum_x = windings_sum_s_x / (part_f * size ** 2)
-    windings_diff_y = windings_diff_s_y / (part_f * size ** 2)
-    windings_sum_y = windings_sum_s_y / (part_f * size ** 2)
-    windings_diff = np.append(windings_diff_x, windings_diff_y)
-    windings_sum = np.append(windings_sum_x, windings_sum_y)
-    diff_mean = np.mean(windings_diff)
-    sum_mean = np.mean(windings_sum)
-    diff_var = np.var(windings_diff, ddof=1) / n_sims
-    sum_var = np.var(windings_sum, ddof=1) / n_sims
-    return diff_mean, sum_mean, diff_var, sum_var
+    lambda_diff_x = windings_diff_s_x / (part_f * size ** 2)
+    lambda_sum_x = windings_sum_s_x / (part_f * size ** 2)
+    lambda_diff_y = windings_diff_s_y / (part_f * size ** 2)
+    lambda_sum_y = windings_sum_s_y / (part_f * size ** 2)
+    lambda_diff = (lambda_diff_x + lambda_diff_y) / 2
+    lambda_sum = (lambda_sum_x + lambda_sum_y) / 2
+    lambda_single = (lambda_diff + lambda_sum) / 4
+    S = get_S(lambda_single, lambda_sum)
+    S_mean = np.mean(S)
+    S_var = np.var(S, ddof=1) / n_sims
+    return S_mean, S_var
+
 def get_chi_list(params):
     try:
         chis = np.array(params["chis"])
@@ -122,7 +157,7 @@ start_parser.set_defaults(func = start_bisection)
 step_parser.set_defaults(func = bisection_step)
 
 start_parser.add_argument("-p", "--parameters", help="Path to parameter file", required = True)
-step_parser.add_argument("-p", "--parameters", help="Path to parameter file", required = True)
+step_parser.add_argument("--sim_folder", help="Path to the sim folder", required = True)
 
 args = parser.parse_args()
 print(args.parameters)
