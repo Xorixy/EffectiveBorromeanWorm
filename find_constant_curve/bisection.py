@@ -67,8 +67,9 @@ def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim,
     s.set_job_name("effborr-bisection")
     s.set_array_start(1)
     s.set_array_end(n_sim)
-    out_loc = loc
-    if os.path.isdir(loc + "/sim"):
+    out_loc = loc + "/sim"
+    print(out_loc)
+    if os.path.isdir(out_loc):
         for filename in os.listdir(out_loc):
             file_path = os.path.join(out_loc, filename)
             try:
