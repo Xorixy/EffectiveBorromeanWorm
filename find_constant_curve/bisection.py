@@ -169,6 +169,5 @@ start_parser.add_argument("-p", "--parameters", help="Path to parameter file", r
 step_parser.add_argument("--sim_folder", help="Path to the sim folder", required = True)
 
 args = parser.parse_args()
-print(args.parameters)
 args.func()
 
