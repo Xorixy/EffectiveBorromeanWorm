@@ -64,6 +64,7 @@ def launch_bisection_step(prev_ids, sim_folder):
     s.set_verbose(True)
     s.set_dependency(f"afterany:{prev_ids}")
     s.set_command("python3 " + sim_folder + "/bisection.py" + " step " + "--sim_folder " + sim_folder)
+    s.run_batch()
 
 def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc):
     settings_loc = loc + "/settings.h5"
