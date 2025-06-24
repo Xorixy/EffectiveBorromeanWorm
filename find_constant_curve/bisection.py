@@ -67,7 +67,59 @@ def bisection_step():
         res.create_dataset("sym/S", data=S_mean)
         res.create_dataset("sym/S_var", data=S_var)
         start_new_chi_step(p)
+    else:
+        continue_chi_step(p)
 
+def continue_chi_step(parameters):
+    sim_folder = parameters["sim_folder"]
+    size = parameters["size"]
+    P = parameters["initial_P"]
+    n_steps = parameters["n_steps"]
+    n_therm = parameters["n_therm"]
+    n_sim = parameters["n_sim"]
+    n_P_parallel = parameters["n_P_parallel"]
+    exec_loc = parameters["exec_loc"]
+    counter_chi_factor = parameters["counter_chi_factor"]
+    width = parameters["initial_width"]
+    res = h5.File(sim_folder + "/result.h5", "r+")
+    k_chi = len(res.keys()) - 2
+    print(f"Running step for chi {k_chi}")
+    chis = get_chi_list(parameters)
+    target_S = res["sym/S"]
+    Ps = res[str(k_chi) + "/Ps"]
+    S = res[str(k_chi) + "/S"]
+    S_var = res[str(k_chi) + "/S_var"]
+    sim_Ps = Ps[len(S):]
+    sim_S, sim_S_var = get_sim_result(sim_folder + "/sim/out", n_sim, size, 1)
+    S = np.append(S, sim_S)
+    S_var = np.append(S_var, sim_S_var)
+    del res[str(k_chi) + "/Ps"]
+    del res[str(k_chi) + "/S"]
+    del res[str(k_chi) + "/S_var"]
+    sort = Ps.argsort()
+    Ps = Ps[sort]
+    S = S[sort]
+    S_var = S_var[sort]
+    res.create_dataset(str(k_chi) + "/Ps", data=Ps)
+    res.create_dataset(str(k_chi) + "/S", data=S)
+    res.create_dataset(str(k_chi) + "/S_var", data=S_var)
+    if len(Ps) >= parameters["max_num_P"]:
+        if k_chi != len(chis) - 1:
+            start_new_chi_step(parameters)
+        else:
+            print("All chis done!")
+    index_min, index_max = -1, -1
+    for i in range(1,len(S)):
+        if S[i] < S and S < S[i-1]:
+            if index_min != -1 or index_max != -1:
+                raise Exception("Error: target S found in multiple places")
+            index_min = i-1
+            index_max = i
+        elif S[i] > S and S > S[i-1]:
+            if index_min != -1 or index_max != -1:
+                raise Exception("Error: target S found in multiple places")
+            index_min = i-1
+            index_max = i
 
 
 def start_new_chi_step(parameters):
@@ -83,6 +135,7 @@ def start_new_chi_step(parameters):
     width = parameters["initial_width"]
     res = h5.File(sim_folder + "/result.h5", "r+")
     k_chi = len(res.keys()) - 1
+    print(f"Starting new chi step for chi {k_chi}")
     chis = get_chi_list(parameters)
     chi = chis[k_chi]
     prev_k, prev_prev_k = get_prev_k_chis(chis, k_chi)
@@ -106,7 +159,7 @@ def start_new_chi_step(parameters):
     S_var = np.array([])
     res.create_dataset(str(k_chi) + "/S", data=S)
     res.create_dataset(str(k_chi) + "/S_var", data=S_var)
-    #launch_bisection_step(sim_ids, sim_folder)
+    launch_bisection_step(sim_ids, sim_folder)
 
 
 
