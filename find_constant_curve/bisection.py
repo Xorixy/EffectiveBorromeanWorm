@@ -181,7 +181,7 @@ def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim,
     s.set_verbose(True)
 
     out_loc += "/out"
-    command = "." + loc + "/exec" + " -s " + settings_loc + " -o " + out_loc + " --array"
+    command = loc + "/exec" + " -s " + settings_loc + " -o " + out_loc + " --array"
     s.set_command(command)
     return s.run_batch()
 
