@@ -91,8 +91,12 @@ def continue_chi_step(parameters):
     S_var = res[str(k_chi) + "/S_var"][:]
     sim_Ps = Ps[len(S):]
     sim_S, sim_S_var = get_sim_result(sim_folder + "/sim/out", n_sim, size, 1)
+    print(sim_S)
+    print(sim_S_var)
     S = np.append(S, sim_S)
     S_var = np.append(S_var, sim_S_var)
+    print(S)
+    print(S_var)
     del res[str(k_chi) + "/Ps"]
     del res[str(k_chi) + "/S"]
     del res[str(k_chi) + "/S_var"]
