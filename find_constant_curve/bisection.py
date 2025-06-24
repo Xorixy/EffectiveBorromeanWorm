@@ -165,7 +165,7 @@ def start_new_chi_step(parameters):
     S_err = np.array([])
     res.create_dataset(str(k_chi) + "/S", data=S)
     res.create_dataset(str(k_chi) + "/S_err", data=S_err)
-    #launch_bisection_step(sim_ids, sim_folder)
+    launch_bisection_step(sim_ids, sim_folder)
 
 
 
