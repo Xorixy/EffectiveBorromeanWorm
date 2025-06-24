@@ -1,3 +1,5 @@
+from logging import exception
+
 import numpy as np
 import h5py as h5
 import os
@@ -29,6 +31,9 @@ def start_bisection():
     shutil.copyfile(python_file, sim_folder + "/bisection.py")
     batch_file = p["batch_file"]
     shutil.copyfile(batch_file, sim_folder + "/batch.py")
+    print("Copying exec")
+    exec = p["exec_loc"]
+    shutil.copyfile(exec, sim_folder + "/exec")
     size = p["size"]
     P = p["initial_P"]
     n_steps = p["n_steps"]
@@ -36,8 +41,10 @@ def start_bisection():
     n_sim = p["n_sim"]
     counter_chi_factor = p["counter_chi_factor"]
     exec = p["exec_loc"]
-    sym_id = launch_array(sim_folder, size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec)
+    chis = get_chi_list(p)
+    sym_id = launch_array(sim_folder, size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec, 1, True)
     res = h5.File(sim_folder + "/result.h5", "x")
+    res.create_dataset("sym/P", data=P)
     launch_bisection_step(sym_id, sim_folder)
 def bisection_step():
     print("Bisection step")
@@ -46,17 +53,92 @@ def bisection_step():
         p = json.load(f)
     print(p["sim_folder"])
     sim_folder = p["sim_folder"]
-    n_sim = p["n_sim"]
     size = p["size"]
+    P = p["initial_P"]
+    n_steps = p["n_steps"]
+    n_therm = p["n_therm"]
+    n_sim = p["n_sim"]
+    counter_chi_factor = p["counter_chi_factor"]
+    width = p["initial_width"]
     res = h5.File(sim_folder + "/result.h5", "r+")
-    S_mean, S_var = get_sim_result(sim_folder + "/sim/out", n_sim, size)
-    print("S_mean:", S_mean)
-    print("S_var:", S_var)
-    res.create_dataset("S_mean", data=S_mean)
-    res.create_dataset("S_var", data=S_var)
+    k_chi = len(res.keys()) - 1
+    chis = get_chi_list(p)
+    if k_chi == -1:
+        print("This should not happen! Aborting bisection")
+    elif k_chi == 0:
+        S_mean, S_var = get_sim_result(sim_folder + "/sim/out", n_sim, size, 1)
+        res.create_dataset("sym/S", data=S_mean)
+        res.create_dataset("sym/S_var", data=S_var)
+        start_new_chi_step(k_chi, p)
 
 
 
+def start_new_chi_step(k_chi, parameters):
+    sim_folder = parameters["sim_folder"]
+    size = parameters["size"]
+    P = parameters["initial_P"]
+    n_steps = parameters["n_steps"]
+    n_therm = parameters["n_therm"]
+    n_sim = parameters["n_sim"]
+    n_P_parallel = parameters["n_P_parallel"]
+    counter_chi_factor = parameters["counter_chi_factor"]
+    width = parameters["initial_width"]
+    res = h5.File(sim_folder + "/result.h5", "r+")
+    k_chi = len(res.keys()) - 1
+    chis = get_chi_list(parameters)
+    chi = chis[k_chi]
+    prev_k, prev_prev_k = get_prev_k_chis(chis, k_chi)
+    P_mid = res["sym/P"][()]
+    if prev_k != -1:
+        prev_chi = chis[prev_k]
+        prev_P = res[str(prev_k) + "/P_est"][()]
+        prev_prev_chi = 0
+        prev_prev_P = res["sym/P"][()]
+        if prev_prev_k != -1:
+            prev_prev_chi = chis[prev_prev_k]
+            prev_prev_P = res[str(prev_prev_k) + "/P_est"][()]
+
+        P_mid = prev_prev_P + (prev_P - prev_prev_P)*(chi - prev_prev_chi)/(prev_chi - prev_prev_chi)
+    P_max = P_mid + width / 2
+    P_min = P_mid - width / 2
+    Ps = get_Ps_init(P_min, P_max, n_P_parallel)
+    sim_ids = launch_step_array(sim_folder, size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_sim, "/exec")
+
+
+
+
+
+def get_prev_k_chis(chis, k_chi):
+    #This function returns the k_chis of the previous and previous-previous steps in the same chi direction as before.
+    #If there is no previous step, then the value of k_prev = -1
+    #As an example, if the chi list is [1, 2, 3, -1, -2, -3] then the pk and ppk of k = 0 are -1, -1 since
+    #there is no lower positive chi value than 1
+    #For k = 1 corresponding to chi = 2, we have pk = 0, ppk = -1 and
+    #for k = 2 we have pk = 1, ppk = 0.
+    #For k = 3 however, we start anew and we should thus have pk = ppk = -1
+    chi = chis[k_chi]
+    prev_chi = 0
+    prev_k_chi = -1
+    prev_prev_chi = 0
+    prev_prev_k_chi = -1
+    if k_chi != 0:
+        prev_chi = chis[k_chi - 1]
+    if np.sign(chi) == np.sign(prev_chi):
+        prev_k_chi = k_chi - 1
+
+    if prev_k_chi != -1:
+        if prev_k_chi != 0:
+            prev_prev_chi = chis[prev_k_chi - 1]
+        if np.sign(prev_chi) == np.sign(prev_prev_chi):
+            prev_prev_k_chi = prev_k_chi - 1
+
+    return prev_k_chi, prev_prev_k_chi
+
+def get_Ps_init(P_min, P_max , n_P_parallel):
+    return np.linspace(P_min, P_max, n_P_parallel + 2)
+
+def get_Ps_step(P_min, P_max, n_P_parallel):
+    return get_Ps_init(P_min, P_max, n_P_parallel)[1:-1]
 
 def launch_bisection_step(prev_ids, sim_folder):
     s = BatchScript()
@@ -68,27 +150,35 @@ def launch_bisection_step(prev_ids, sim_folder):
     s.set_command("python3 " + sim_folder + "/bisection.py" + " step " + "--sim_folder " + sim_folder)
     s.run_batch()
 
-def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc):
+def launch_step_array(loc, size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc):
+    sim_ids = str(launch_array(loc, size, Ps[0], chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1, True))
+    for i in range(1, len(Ps)):
+        sim_ids += ","
+        sim_ids += str(launch_array(loc, size, Ps[i], chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1 + i*n_sim, False))
+    return sim_ids
+
+def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, array_start, new_folder):
     settings_loc = loc + "/settings.h5"
     create_settings_file(settings_loc, size, P, chi, n_steps, n_therm, counter_chi_factor)
     s = BatchScript()
     s.set_job_name("effborr-bisection")
-    s.set_array_start(1)
-    s.set_array_end(n_sim)
+    s.set_array_start(array_start)
+    s.set_array_end(array_start + n_sim - 1)
     out_loc = loc + "/sim"
     print(out_loc)
-    if os.path.isdir(out_loc):
-        for filename in os.listdir(out_loc):
-            file_path = os.path.join(out_loc, filename)
-            try:
-                if os.path.isfile(file_path) or os.path.islink(file_path):
-                    os.unlink(file_path)
-                elif os.path.isdir(file_path):
-                    shutil.rmtree(file_path)
-            except Exception as e:
-                print('Failed to delete %s. Reason: %s' % (file_path, e))
-    else:
-        os.makedirs(out_loc)
+    if new_folder is True:
+        if os.path.isdir(out_loc):
+            for filename in os.listdir(out_loc):
+                file_path = os.path.join(out_loc, filename)
+                try:
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        os.unlink(file_path)
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)
+                except Exception as e:
+                    print('Failed to delete %s. Reason: %s' % (file_path, e))
+        else:
+            os.makedirs(out_loc)
     s.set_output_name(out_loc)
     s.set_run_time(estimate_run_time(n_steps, n_therm))
     s.set_verbose(True)
@@ -114,14 +204,23 @@ def create_settings_file(settings_loc, size, P, chi, n_steps, n_therm, counter_c
         f["settings/save/annulus_size"] = np.float64(0.5)
         f["settings/save/save_interval"] = np.int32(1)
 
-def get_sim_result(outfile, n_sims, size):
+def get_sim_array_result(outfile, n_sims, size, Ps):
+    S_means = np.zeros(len(Ps))
+    S_vars  = np.zeros(len(Ps))
+    for i in range(len(Ps)):
+        S_mean, S_var = get_sim_result(outfile, n_sims, size, 1 + i*n_sims)
+        S_means[i] = S_mean
+        S_vars[i] = S_var
+    return S_means, S_vars
+
+def get_sim_result(outfile, n_sims, size, array_start):
     part_f = np.zeros(n_sims)
     windings_diff_s_x = np.zeros(n_sims)
     windings_diff_s_y = np.zeros(n_sims)
     windings_sum_s_x = np.zeros(n_sims)
     windings_sum_s_y = np.zeros(n_sims)
     for i in range(n_sims):
-        file_path = outfile + "_" + str(i + 1) + ".h5"
+        file_path = outfile + "_" + str(i + array_start) + ".h5"
         with h5.File(file_path, "r") as sim_file:
             base = int(sim_file['/constants/base_minus_one'][()]) + 1
             part_f[i] = int(sim_file['/data/partition_function'][()])
@@ -156,6 +255,19 @@ def get_chi_list(params):
         chis = np.linspace(0, chi_max, n_chis + 1)[1:]
     if params["two_sided"]:
         chis = np.append(chis, -chis)
+    switched_sign = False
+    for i in range(1, len(chis)):
+        if chis[i] == 0:
+            raise Exception("Chi list contains zero. Aborting")
+        if chis[i-1] == 0:
+            raise Exception("Chi list contains zero. Aborting")
+        if np.sign(chis[i]) != np.sign(chis[i - 1]):
+            if not switched_sign:
+                switched_sign = True
+            else:
+                raise Exception("Chi list switched sign twice. Aborting")
+        elif np.sign(chis[i]) != np.sign(chis[i] - chis[i - 1]):
+            raise Exception("Chi list is not in increasing absolute value. Aborting")
     return chis
 
 parser = argparse.ArgumentParser(description = "Bisection find constant curve")

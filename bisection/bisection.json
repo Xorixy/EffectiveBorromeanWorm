@@ -2,7 +2,7 @@
   "initial_P": 0.5,
   "chi_max": 0.05,
   "n_chi": 10,
-  "n_chi_parallel": 4,
+  "n_P_parallel": 4,
   "initial_width": 0.05,
   "tol" : 1,
   "two_sided" : true,
@@ -14,5 +14,6 @@
   "exec_loc": "/EFFBORR",
   "counter_chi_factor" : 2,
   "python_file" : "bisection.py",
-  "batch_file" : "batch.py"
+  "batch_file" : "batch.py",
+  "max_num_P" : 10
 }
