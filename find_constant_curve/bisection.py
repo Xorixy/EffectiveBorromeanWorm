@@ -65,7 +65,7 @@ def bisection_step():
     elif k_chi == -1:
         S_mean, S_var = get_sim_result(sim_folder + "/sim/out", n_sim, size, 1)
         res.create_dataset("sym/S", data=S_mean)
-        res.create_dataset("sym/S_var", data=S_var)
+        res.create_dataset("sym/S_err", data=np.sqrt(S_var))
         start_new_chi_step(p)
     else:
         continue_chi_step(p)
@@ -88,25 +88,25 @@ def continue_chi_step(parameters):
     target_S = res["sym/S"][()]
     Ps = res[str(k_chi) + "/Ps"][:]
     S = res[str(k_chi) + "/S"][:]
-    S_var = res[str(k_chi) + "/S_var"][:]
+    S_err = res[str(k_chi) + "/S_err"][:]
     sim_Ps = Ps[len(S):]
     sim_S, sim_S_var = get_sim_array_result(sim_folder + "/sim/out", n_sim, size, Ps)
     print(sim_S)
     print(sim_S_var)
     S = np.append(S, sim_S)
-    S_var = np.append(S_var, sim_S_var)
+    S_err = np.append(S_err, np.sqrt(sim_S_var))
     print(S)
-    print(S_var)
+    print(S_err)
     del res[str(k_chi) + "/Ps"]
     del res[str(k_chi) + "/S"]
     del res[str(k_chi) + "/S_var"]
     sort = Ps.argsort()
     Ps = Ps[sort]
     S = S[sort]
-    S_var = S_var[sort]
+    S_err = S_err[sort]
     res.create_dataset(str(k_chi) + "/Ps", data=Ps)
     res.create_dataset(str(k_chi) + "/S", data=S)
-    res.create_dataset(str(k_chi) + "/S_var", data=S_var)
+    res.create_dataset(str(k_chi) + "/S_err", data=S_err)
     if len(Ps) >= parameters["max_num_P"]:
         if k_chi != len(chis) - 1:
             start_new_chi_step(parameters)
@@ -160,9 +160,9 @@ def start_new_chi_step(parameters):
     sim_ids = launch_step_array(sim_folder, size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc)
     res.create_dataset(str(k_chi) + "/Ps", data=Ps)
     S = np.array([])
-    S_var = np.array([])
+    S_err = np.array([])
     res.create_dataset(str(k_chi) + "/S", data=S)
-    res.create_dataset(str(k_chi) + "/S_var", data=S_var)
+    res.create_dataset(str(k_chi) + "/S_err", data=S_err)
     launch_bisection_step(sim_ids, sim_folder)
 
 
