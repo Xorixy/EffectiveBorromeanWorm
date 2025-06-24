@@ -11,7 +11,7 @@
   "n_therm" : 100000,
   "n_steps" : 100000,
   "n_sim": 10,
-  "exec_loc": "EFFBORR",
+  "exec_loc": "/home/x_algol/Worm/EffectiveBorromeanWorm/find_constant_curve/EFFBORR",
   "counter_chi_factor" : 2,
   "python_file" : "bisection.py",
   "batch_file" : "batch.py",
