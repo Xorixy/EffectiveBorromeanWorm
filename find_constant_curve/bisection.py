@@ -91,10 +91,9 @@ def continue_chi_step(parameters):
     S_err = res[str(k_chi) + "/S_err"][:]
     sim_Ps = Ps[len(S):]
     sim_S, sim_S_var = get_sim_array_result(sim_folder + "/sim/out", n_sim, size, Ps)
-    print(sim_S)
-    print(sim_S_var)
     S = np.append(S, sim_S)
     S_err = np.append(S_err, np.sqrt(sim_S_var))
+    print(target_S)
     print(S)
     print(S_err)
     del res[str(k_chi) + "/Ps"]
@@ -163,7 +162,7 @@ def start_new_chi_step(parameters):
     S_err = np.array([])
     res.create_dataset(str(k_chi) + "/S", data=S)
     res.create_dataset(str(k_chi) + "/S_err", data=S_err)
-    launch_bisection_step(sim_ids, sim_folder)
+    #launch_bisection_step(sim_ids, sim_folder)
 
 
 
