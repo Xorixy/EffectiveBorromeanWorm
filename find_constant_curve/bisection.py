@@ -114,12 +114,12 @@ def continue_chi_step(parameters):
             print("All chis done!")
     index_min, index_max = -1, -1
     for i in range(1,len(S)):
-        if S[i] < S and S < S[i-1]:
+        if S[i] < target_S and target_S < S[i-1]:
             if index_min != -1 or index_max != -1:
                 raise Exception("Error: target S found in multiple places")
             index_min = i-1
             index_max = i
-        elif S[i] > S and S > S[i-1]:
+        elif S[i] > target_S and target_S > S[i-1]:
             if index_min != -1 or index_max != -1:
                 raise Exception("Error: target S found in multiple places")
             index_min = i-1
