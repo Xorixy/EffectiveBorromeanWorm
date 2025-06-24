@@ -99,7 +99,7 @@ def continue_chi_step(parameters):
     print(S_err)
     del res[str(k_chi) + "/Ps"]
     del res[str(k_chi) + "/S"]
-    del res[str(k_chi) + "/S_var"]
+    del res[str(k_chi) + "/S_err"]
     sort = Ps.argsort()
     Ps = Ps[sort]
     S = S[sort]
