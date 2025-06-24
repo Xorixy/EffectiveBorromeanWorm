@@ -40,7 +40,7 @@ def start_bisection():
     n_therm = p["n_therm"]
     n_sim = p["n_sim"]
     counter_chi_factor = p["counter_chi_factor"]
-    exec = p["exec_loc"]
+    exec = "/" + exec
     chis = get_chi_list(p)
     sym_id = launch_array(sim_folder, size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec, 1, True)
     res = h5.File(sim_folder + "/result.h5", "x")
