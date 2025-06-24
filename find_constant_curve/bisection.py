@@ -1,5 +1,3 @@
-from logging import exception
-
 import numpy as np
 import h5py as h5
 import os
@@ -40,9 +38,8 @@ def start_bisection():
     n_therm = p["n_therm"]
     n_sim = p["n_sim"]
     counter_chi_factor = p["counter_chi_factor"]
-    exec = "/" + exec
     chis = get_chi_list(p)
-    sym_id = launch_array(sim_folder, size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec, 1, True)
+    sym_id = launch_array(sim_folder, size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim, 1, True)
     res = h5.File(sim_folder + "/result.h5", "x")
     res.create_dataset("sym/P", data=P)
     launch_bisection_step(sym_id, sim_folder)
@@ -102,7 +99,7 @@ def start_new_chi_step(k_chi, parameters):
     P_max = P_mid + width / 2
     P_min = P_mid - width / 2
     Ps = get_Ps_init(P_min, P_max, n_P_parallel)
-    sim_ids = launch_step_array(sim_folder, size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_sim, "/exec")
+    sim_ids = launch_step_array(sim_folder, size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_sim)
 
 
 
@@ -150,14 +147,14 @@ def launch_bisection_step(prev_ids, sim_folder):
     s.set_command("python3 " + sim_folder + "/bisection.py" + " step " + "--sim_folder " + sim_folder)
     s.run_batch()
 
-def launch_step_array(loc, size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc):
-    sim_ids = str(launch_array(loc, size, Ps[0], chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1, True))
+def launch_step_array(loc, size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_sim):
+    sim_ids = str(launch_array(loc, size, Ps[0], chi, n_steps, n_therm, counter_chi_factor, n_sim, 1, True))
     for i in range(1, len(Ps)):
         sim_ids += ","
-        sim_ids += str(launch_array(loc, size, Ps[i], chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1 + i*n_sim, False))
+        sim_ids += str(launch_array(loc, size, Ps[i], chi, n_steps, n_therm, counter_chi_factor, n_sim, 1 + i*n_sim, False))
     return sim_ids
 
-def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, array_start, new_folder):
+def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim, array_start, new_folder):
     settings_loc = loc + "/settings.h5"
     create_settings_file(settings_loc, size, P, chi, n_steps, n_therm, counter_chi_factor)
     s = BatchScript()
@@ -184,7 +181,7 @@ def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim,
     s.set_verbose(True)
 
     out_loc += "/out"
-    command = "." + exec_loc + " -s " + settings_loc + " -o " + out_loc + " --array"
+    command = "." + loc + "/exec" + " -s " + settings_loc + " -o " + out_loc + " --array"
     s.set_command(command)
     return s.run_batch()
 
