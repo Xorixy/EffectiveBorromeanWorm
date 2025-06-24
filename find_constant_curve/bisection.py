@@ -66,7 +66,7 @@ def bisection_step():
         S_mean, S_var = get_sim_result(sim_folder + "/sim/out", n_sim, size, 1)
         res.create_dataset("sym/S", data=S_mean)
         res.create_dataset("sym/S_var", data=S_var)
-        start_new_chi_step(k_chi, p)
+        start_new_chi_step(p)
 
 
 
