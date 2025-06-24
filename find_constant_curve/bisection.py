@@ -156,6 +156,9 @@ def start_new_chi_step(parameters):
     P_max = P_mid + width / 2
     P_min = P_mid - width / 2
     Ps = get_Ps_init(P_min, P_max, n_P_parallel)
+    print(Ps)
+    print(Ps + chi)
+    print(Ps - counter_chi_factor*chi)
     sim_ids = launch_step_array(sim_folder, size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc)
     res.create_dataset(str(k_chi) + "/Ps", data=Ps)
     S = np.array([])
