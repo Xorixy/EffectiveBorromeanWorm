@@ -90,7 +90,7 @@ def continue_chi_step(parameters):
     S = res[str(k_chi) + "/S"][:]
     S_var = res[str(k_chi) + "/S_var"][:]
     sim_Ps = Ps[len(S):]
-    sim_S, sim_S_var = get_sim_result(sim_folder + "/sim/out", n_sim, size, 1)
+    sim_S, sim_S_var = get_sim_array_result(sim_folder + "/sim/out", n_sim, size, Ps)
     print(sim_S)
     print(sim_S_var)
     S = np.append(S, sim_S)
