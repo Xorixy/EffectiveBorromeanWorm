@@ -85,10 +85,10 @@ def continue_chi_step(parameters):
     k_chi = len(res.keys()) - 2
     print(f"Running step for chi {k_chi}")
     chis = get_chi_list(parameters)
-    target_S = res["sym/S"]
-    Ps = res[str(k_chi) + "/Ps"]
-    S = res[str(k_chi) + "/S"]
-    S_var = res[str(k_chi) + "/S_var"]
+    target_S = res["sym/S"][()]
+    Ps = res[str(k_chi) + "/Ps"][:]
+    S = res[str(k_chi) + "/S"][:]
+    S_var = res[str(k_chi) + "/S_var"][:]
     sim_Ps = Ps[len(S):]
     sim_S, sim_S_var = get_sim_result(sim_folder + "/sim/out", n_sim, size, 1)
     S = np.append(S, sim_S)
