@@ -70,7 +70,7 @@ def bisection_step():
 
 
 
-def start_new_chi_step(k_chi, parameters):
+def start_new_chi_step(parameters):
     sim_folder = parameters["sim_folder"]
     size = parameters["size"]
     P = parameters["initial_P"]
@@ -86,12 +86,12 @@ def start_new_chi_step(k_chi, parameters):
     chis = get_chi_list(parameters)
     chi = chis[k_chi]
     prev_k, prev_prev_k = get_prev_k_chis(chis, k_chi)
-    P_mid = res["sym/P"][()]
+    P_mid = P
     if prev_k != -1:
         prev_chi = chis[prev_k]
         prev_P = res[str(prev_k) + "/P_est"][()]
         prev_prev_chi = 0
-        prev_prev_P = res["sym/P"][()]
+        prev_prev_P = P
         if prev_prev_k != -1:
             prev_prev_chi = chis[prev_prev_k]
             prev_prev_P = res[str(prev_prev_k) + "/P_est"][()]
@@ -101,7 +101,7 @@ def start_new_chi_step(k_chi, parameters):
     P_min = P_mid - width / 2
     Ps = get_Ps_init(P_min, P_max, n_P_parallel)
     sim_ids = launch_step_array(sim_folder, size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc)
-
+    res.create_dataset(str(k_chi) + "/Ps", data=Ps)
 
 
 

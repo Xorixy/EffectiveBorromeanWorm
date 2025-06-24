@@ -1,8 +1,8 @@
 {
   "initial_P": 0.5,
   "chi_max": 0.05,
-  "n_chi": 10,
-  "n_P_parallel": 4,
+  "n_chi": 2,
+  "n_P_parallel": 2,
   "initial_width": 0.05,
   "tol" : 1,
   "two_sided" : true,
@@ -10,10 +10,10 @@
   "size" : 10,
   "n_therm" : 100000,
   "n_steps" : 100000,
-  "n_sim": 10,
+  "n_sim": 2,
   "exec_loc": "/home/x_algol/Worm/EffectiveBorromeanWorm/find_constant_curve/EFFBORR",
   "counter_chi_factor" : 2,
   "python_file" : "bisection.py",
   "batch_file" : "batch.py",
-  "max_num_P" : 10
+  "max_num_P" : 5
 }
