@@ -12,11 +12,6 @@ def get_S(single_stiffness, double_stiffness):
     v = np.pi*single_stiffness - 2
     w = np.pi*double_stiffness - 2
     S = 8*v**2 + 5*w**2 - 4*v*w
-    print("ss = " + str(single_stiffness))
-    print("ds = " + str(double_stiffness))
-    print("v  = " + str(v))
-    print("w  = " + str(w))
-    print("S  = " + str(S))
     return S
 def estimate_run_time(n_steps, n_therm):
     return int(2*(n_steps + n_therm)/(10 ** 7)) + 10
@@ -310,9 +305,6 @@ def get_sim_result(outfile, n_sims, size, array_start):
     S = get_S(lambda_single, lambda_sum)
     S_mean = np.mean(S)
     S_var = np.var(S, ddof=1) / n_sims
-    print("lambda_sum  = ", lambda_sum)
-    print("lambda_diff = ", lambda_diff)
-    print("S           = ", S)
     return S_mean, S_var
 
 def get_chi_list(params):
