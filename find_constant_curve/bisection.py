@@ -94,9 +94,11 @@ def continue_chi_step(parameters):
     sim_S, sim_S_var = get_sim_array_result(sim_folder + "/sim/out", n_sim, size, Ps)
     S = np.append(S, sim_S)
     S_err = np.append(S_err, np.sqrt(sim_S_var))
-    print(target_S)
-    print(S)
-    print(S_err)
+    print("init P : " + P)
+    print("target S : " + target_S)
+    print("Ps : " + Ps)
+    print("Ss : " + S)
+    print("S_err: " + S_err)
     del res[str(k_chi) + "/Ps"]
     del res[str(k_chi) + "/S"]
     del res[str(k_chi) + "/S_err"]
