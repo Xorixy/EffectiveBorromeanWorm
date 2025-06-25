@@ -72,7 +72,7 @@ def bisection_step():
         S_mean, S_var = get_sim_result(sim_folder + "/sim/out", n_sim, size, 1)
         res.create_dataset("sym/S", data=S_mean)
         res.create_dataset("sym/S_err", data=np.sqrt(S_var))
-        start_new_chi_step(p)
+        #start_new_chi_step(p)
     else:
         continue_chi_step(p)
 
@@ -310,6 +310,9 @@ def get_sim_result(outfile, n_sims, size, array_start):
     S = get_S(lambda_single, lambda_sum)
     S_mean = np.mean(S)
     S_var = np.var(S, ddof=1) / n_sims
+    print("lambda_sum  = ", lambda_sum)
+    print("lambda_diff = ", lambda_diff)
+    print("S           = ", S)
     return S_mean, S_var
 
 def get_chi_list(params):
