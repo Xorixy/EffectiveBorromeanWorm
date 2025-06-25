@@ -228,7 +228,7 @@ def launch_step_array(loc, size, Ps, chi, n_steps, n_therm, counter_chi_factor, 
     return sim_ids
 
 def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, array_start, new_folder):
-    settings_loc = loc + "/settings.h5"
+    settings_loc = loc + "/settings" + str(array_start) + ".h5"
     create_settings_file(settings_loc, size, P, chi, n_steps, n_therm, counter_chi_factor)
     s = BatchScript()
     s.set_job_name("effborr-bisection")
@@ -259,7 +259,6 @@ def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim,
     return s.run_batch()
 
 def create_settings_file(settings_loc, size, P, chi, n_steps, n_therm, counter_chi_factor):
-    chi = 0
     with h5.File(settings_loc, "w") as f:
         f["settings/save/windings"] = np.bool(True)
         f["settings/save/correlations"] = np.bool(False)
