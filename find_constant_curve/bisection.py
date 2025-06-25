@@ -11,7 +11,11 @@ import shutil
 def get_S(single_stiffness, double_stiffness):
     v = np.pi*single_stiffness - 2
     w = double_stiffness - 2
-    return 8*v**2 + 5*w**2 - 4*v*w
+    S = 8*v**2 + 5*w**2 - 4*v*w
+    print("v = " + str(v))
+    print("w = " + str(w))
+    print("S = " + str(S))
+    return S
 def estimate_run_time(n_steps, n_therm):
     return int(2*(n_steps + n_therm)/(10 ** 7)) + 10
 def start_bisection():
