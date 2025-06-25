@@ -61,14 +61,17 @@ def bisection_step():
     res = h5.File(sim_folder + "/result.h5", "r+")
     k_chi = len(res.keys()) - 2
     chis = get_chi_list(p)
+    print("hej :)")
     if k_chi == -2:
         print("This should not happen! Aborting bisection")
     elif k_chi == -1:
+        print("kchi -1")
         S_mean, S_var = get_sim_result(sim_folder + "/sim/out", n_sim, size, 1)
         res.create_dataset("sym/S", data=S_mean)
         res.create_dataset("sym/S_err", data=np.sqrt(S_var))
-        #start_new_chi_step(p)
+        start_new_chi_step(p)
     else:
+        print("kchi >= 0")
         continue_chi_step(p)
 
 def continue_chi_step(parameters):
@@ -173,7 +176,7 @@ def start_new_chi_step(parameters):
     S_err = np.array([])
     res.create_dataset(str(k_chi) + "/S", data=S)
     res.create_dataset(str(k_chi) + "/S_err", data=S_err)
-    launch_bisection_step(sim_ids, sim_folder)
+    #launch_bisection_step(sim_ids, sim_folder)
 
 
 
