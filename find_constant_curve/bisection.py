@@ -10,11 +10,13 @@ import shutil
 
 def get_S(single_stiffness, double_stiffness):
     v = np.pi*single_stiffness - 2
-    w = double_stiffness - 2
+    w = np.pi*double_stiffness - 2
     S = 8*v**2 + 5*w**2 - 4*v*w
-    print("v = " + str(v))
-    print("w = " + str(w))
-    print("S = " + str(S))
+    print("ss = " + str(single_stiffness))
+    print("ds = " + str(double_stiffness))
+    print("v  = " + str(v))
+    print("w  = " + str(w))
+    print("S  = " + str(S))
     return S
 def estimate_run_time(n_steps, n_therm):
     return int(2*(n_steps + n_therm)/(10 ** 7)) + 10
