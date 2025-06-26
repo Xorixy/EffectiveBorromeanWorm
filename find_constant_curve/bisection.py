@@ -94,16 +94,6 @@ def continue_chi_step(parameters):
     sim_S, sim_S_var = get_sim_array_result(sim_folder + "/sim/out", n_sim, size, Ps)
     S = np.append(S, sim_S)
     S_err = np.append(S_err, np.sqrt(sim_S_var))
-    print("init P : ")
-    print(P)
-    print("target S : ")
-    print(target_S)
-    print("Ps : ")
-    print(Ps)
-    print("Ss : ")
-    print(S)
-    print("S_err: ")
-    print(S_err)
     del res[str(k_chi) + "/Ps"]
     del res[str(k_chi) + "/S"]
     del res[str(k_chi) + "/S_err"]
@@ -120,6 +110,7 @@ def continue_chi_step(parameters):
         else:
             print("All chis done!")
     index_min, index_max = -1, -1
+    multiple_target_s = False
     for i in range(1,len(S)):
         if S[i] < target_S and target_S < S[i-1]:
             if index_min != -1 or index_max != -1:
