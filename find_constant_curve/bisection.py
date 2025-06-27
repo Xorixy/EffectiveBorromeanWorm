@@ -51,7 +51,6 @@ def start_bisection():
     res.create_dataset("sym/P", data=P)
     sym_id = launch_array(sim_folder + "/sim/sym", size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1, True)
     launch_bisection_step(sym_id, sim_folder, -1, 1)
-    return
     for i in range(len(chis)):
         start_new_chi_step(p, i)
 def bisection_step():
