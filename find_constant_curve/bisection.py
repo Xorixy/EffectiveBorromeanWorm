@@ -168,6 +168,7 @@ def start_new_chi_step(parameters):
     S_err = np.array([])
     res.create_dataset(str(k_chi) + "/S", data=S)
     res.create_dataset(str(k_chi) + "/S_err", data=S_err)
+    res.create_dataset(str(k_chi) + "/chi", data=chi)
     launch_bisection_step(sim_ids, sim_folder)
 
 
@@ -310,6 +311,7 @@ def get_sim_result(outfile, n_sims, size, array_start):
     return S_mean, S_var
 
 def get_chi_list(params):
+    return np.array([0, 0.05, 0.1, -0.05, -0.1])
     try:
         chis = np.array(params["chis"])
         if (len(chis) < 1):
