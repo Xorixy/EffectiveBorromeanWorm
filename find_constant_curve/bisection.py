@@ -109,6 +109,8 @@ def continue_chi_step(parameters):
             start_new_chi_step(parameters)
         else:
             print("All chis done!")
+
+    """
     index_min, index_max = -1, -1
     multiple_target_s = False
     for i in range(1,len(S)):
@@ -122,7 +124,7 @@ def continue_chi_step(parameters):
                 raise Exception("Error: target S found in multiple places")
             index_min = i-1
             index_max = i
-
+    """
 
 def start_new_chi_step(parameters):
     sim_folder = parameters["sim_folder"]
@@ -140,8 +142,9 @@ def start_new_chi_step(parameters):
     print(f"Starting new chi step for chi {k_chi}")
     chis = get_chi_list(parameters)
     chi = chis[k_chi]
-    prev_k, prev_prev_k = get_prev_k_chis(chis, k_chi)
     P_mid = P
+    """
+    prev_k, prev_prev_k = get_prev_k_chis(chis, k_chi)
     if prev_k != -1:
         prev_chi = chis[prev_k]
         prev_P = res[str(prev_k) + "/P_est"][()]
@@ -152,6 +155,7 @@ def start_new_chi_step(parameters):
             prev_prev_P = res[str(prev_prev_k) + "/P_est"][()]
 
         P_mid = prev_prev_P + (prev_P - prev_prev_P)*(chi - prev_prev_chi)/(prev_chi - prev_prev_chi)
+    """
     P_max = P_mid + width / 2
     P_min = P_mid - width / 2
     Ps = get_Ps_init(P_min, P_max, n_P_parallel)
