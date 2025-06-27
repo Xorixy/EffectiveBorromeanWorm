@@ -58,7 +58,10 @@ void io::save_time_series(const sim::TimeSeriesStruct& save, const std::string& 
     io::save_uint_vec(save.windings_difference_squared_y, prefix + "/windings_diff_squared_y");
     io::save_uint_vec(save.windings_sum_squared_x, prefix + "/windings_sum_squared_x");
     io::save_uint_vec(save.windings_sum_squared_y, prefix + "/windings_sum_squared_y");
-    io::outfile.writeDataset<std::vector<std::array<long long int, 4>>>(save.windings, prefix + "/windings");
+    if (settings::save::save_therm) {
+        io::outfile.writeDataset<std::vector<std::array<long long int, 4>>>(save.windings, prefix + "/windings");
+        io::outfile.writeDataset<std::vector<std::array<long long int, 2>>>(save.total_bonds, prefix + "/total_bonds");
+    }
     io::outfile.writeDataset<std::vector<long long unsigned int>>(save.partition_function, prefix + "/partition_function");
     io::outfile.writeDataset<std::vector<long long unsigned int>>(save.annulus_sum, prefix + "/annulus_sum");
 }

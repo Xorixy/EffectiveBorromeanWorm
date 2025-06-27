@@ -121,6 +121,10 @@ void state::State::try_to_add_bond(int dir) {
     int cf = worm_color_forward;
     int cb = worm_color_backward;
     auto &bonds = m_bonds.at(p).at(dir);
+    if (settings::save::save_therm) {
+        m_total_bonds[0] -= bonds[0] != 0;
+        m_total_bonds[1] -= bonds[1] != 0;
+    }
     if (cb == -1) {
         double roll = rnd::uniform_unit();
         if (
@@ -134,7 +138,7 @@ void state::State::try_to_add_bond(int dir) {
             m_bonds.at(p).at(dir).at(cf) += 1;
             const Point p_opposite = m_lattice.get_neighbor(p, dir);
             m_bonds.at(p_opposite).at(opposite_direction(dir)).at(cf) -= 1;
-            if (settings::save::windings) {
+            if (settings::save::windings || settings::save::save_therm) {
                 m_winding_numbers.at(cf).at(absolute_direction(dir)) += direction_sign(dir);
             }
             worm_head = p_opposite;
@@ -154,7 +158,7 @@ void state::State::try_to_add_bond(int dir) {
             m_bonds.at(p).at(dir).at(cb) -= 1;
             const Point p_opposite = m_lattice.get_neighbor(p, dir);
             m_bonds.at(p_opposite).at(opposite_direction(dir)).at(cb) += 1;
-            if (settings::save::windings) {
+            if (settings::save::windings || settings::save::save_therm) {
                 m_winding_numbers.at(cb).at(absolute_direction(dir)) -= direction_sign(dir);
             }
             worm_head = p_opposite;
@@ -172,12 +176,16 @@ void state::State::try_to_add_bond(int dir) {
             const Point p_opposite = m_lattice.get_neighbor(p, dir);
             m_bonds.at(p_opposite).at(opposite_direction(dir)).at(cf) -= 1;
             m_bonds.at(p_opposite).at(opposite_direction(dir)).at(cb) += 1;
-            if (settings::save::windings) {
+            if (settings::save::windings || settings::save::save_therm) {
                 m_winding_numbers.at(cf).at(absolute_direction(dir)) += direction_sign(dir);
                 m_winding_numbers.at(cb).at(absolute_direction(dir)) -= direction_sign(dir);
             }
             worm_head = p_opposite;
         }
+    }
+    if (settings::save::save_therm) {
+        m_total_bonds[0] += bonds[0] != 0;
+        m_total_bonds[1] += bonds[1] != 0;
     }
 }
 
@@ -378,3 +386,8 @@ void state::State::print_windings() {
 std::vector<std::vector<long long int>> const & state::State::get_winding_numbers() const {
     return m_winding_numbers;
 }
+
+std::array<long long int, 2> const& state::State::get_total_bonds() const {
+    return m_total_bonds;
+}
+

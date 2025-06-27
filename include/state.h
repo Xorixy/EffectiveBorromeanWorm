@@ -7,7 +7,7 @@
 #include "../include/exceptions.h"
 #include <fmt/core.h>
 #include <string>
-
+#include <array>
 
 namespace state {
     using Point = int;
@@ -57,6 +57,7 @@ namespace state {
             Point worm_tail;
             int worm_color_forward;
             int worm_color_backward;
+            std::array<long long int, 2> m_total_bonds { 0,0 };
         public:
             State();
             void try_to_add_bond(int dir);
@@ -71,5 +72,6 @@ namespace state {
             Coord get_coords(Point p);
             void print_windings();
             [[nodiscard]] std::vector<std::vector<long long int>> const & get_winding_numbers() const;
+            [[nodiscard]] std::array<long long int, 2> const& get_total_bonds() const;
     };
 }

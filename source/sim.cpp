@@ -31,6 +31,14 @@ void sim::Simulation::run() {
         extract_state_data();
         i_iter++;
         if (settings::save::time_series && i_iter % settings::save::save_interval == 0) {
+            auto & component_windings = m_state.get_winding_numbers();
+            if (settings::save::save_therm) {
+                save.windings.at(0) = component_windings.at(0).at(0);
+                save.windings.at(1) = component_windings.at(0).at(1);
+                save.windings.at(2) = component_windings.at(1).at(0);
+                save.windings.at(3) = component_windings.at(1).at(1);
+                save.total_bonds = m_state.get_total_bonds();
+            }
             time.add_slice(save);
         }
     }
@@ -42,6 +50,14 @@ void sim::Simulation::run() {
     io::save_base();
     io::save_annulus_size(m_annulus.get_size());
     if (!settings::save::time_series || i_iter % settings::save::save_interval != 0) {
+        auto & component_windings = m_state.get_winding_numbers();
+        if (settings::save::save_therm) {
+            save.windings.at(0) = component_windings.at(0).at(0);
+            save.windings.at(1) = component_windings.at(0).at(1);
+            save.windings.at(2) = component_windings.at(1).at(0);
+            save.windings.at(3) = component_windings.at(1).at(1);
+            save.total_bonds = m_state.get_total_bonds();
+        }
         time.add_slice(save);
     }
     if (settings::save::time_series) {
@@ -59,13 +75,6 @@ void sim::Simulation::extract_state_data() {
     const int worm_tail = m_state.get_worm_tail();
     if (worm_head == worm_tail) {
         save.partition_function++;
-        auto & component_windings = m_state.get_winding_numbers();
-        if (settings::save::therm_windings) {
-            save.windings.at(0) = component_windings.at(0).at(0);
-            save.windings.at(1) = component_windings.at(0).at(1);
-            save.windings.at(2) = component_windings.at(1).at(0);
-            save.windings.at(3) = component_windings.at(1).at(1);
-        }
         if (settings::save::windings) {
             auto [wind_diff_x, wind_diff_y] = m_state.get_winding_diff_square();
             auto [wind_sum_x , wind_sum_y ] = m_state.get_winding_sum_square();
@@ -87,6 +96,7 @@ sim::TimeSeriesStruct::TimeSeriesStruct()
     , partition_function(0)
     , annulus_sum(0)
     , windings(0)
+    , total_bonds(0)
 {}
 
 void sim::TimeSeriesStruct::add_slice(const SaveStruct &save) {
@@ -97,4 +107,5 @@ void sim::TimeSeriesStruct::add_slice(const SaveStruct &save) {
     partition_function.push_back(save.partition_function);
     annulus_sum.push_back(save.annulus_sum);
     windings.push_back(save.windings);
+    total_bonds.push_back(save.total_bonds);
 }

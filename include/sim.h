@@ -18,6 +18,7 @@ namespace sim {
         long long unsigned int partition_function { 0 };
         long long unsigned int annulus_sum { 0 };
         std::array<long long int, 4> windings { 0,0,0,0 };
+        std::array<long long int, 2> total_bonds { 0,0 };
     };
 
     struct TimeSeriesStruct {
@@ -28,6 +29,7 @@ namespace sim {
         std::vector<long long unsigned int> partition_function;
         std::vector<long long unsigned int> annulus_sum;
         std::vector<std::array<long long int, 4>> windings;
+        std::vector<std::array<long long int, 2>> total_bonds;
         TimeSeriesStruct();
         void add_slice(const SaveStruct &save);
     };
