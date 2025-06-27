@@ -20,6 +20,7 @@ class BatchScript:
         self.cpu_per_task = 1
         self.openmp = False
         self.verbose = False
+        self.log_name = None
 
     def set_job_name(self, job_name):
         self.job_name = job_name
@@ -67,14 +68,21 @@ class BatchScript:
     def set_verbose(self, verbose):
         self.verbose = verbose
 
+    def set_log_name(self, log_name):
+        self.log_name = log_name
+
     def create_batch_script(self):
         if self.job_name is None or self.command is None or self.run_time is None or self.output_name is None:
             raise Exception("Error, not all required parameters are set")
         with open(f'{self.job_name}.slurm', "x") as script:
             script.write("#!/bin/bash\n")
             script.write(f"#SBATCH --job-name={self.job_name}\n")
-            script.write(f"#SBATCH --output={self.output_name}/log/log_%a.txt\n")
-            script.write(f"#SBATCH --error={self.output_name}/err/err_%a.txt\n")
+            if self.log_name is None:
+                script.write(f"#SBATCH --output={self.output_name}/log/log_%a.txt\n")
+                script.write(f"#SBATCH --error={self.output_name}/err/err_%a.txt\n")
+            else:
+                script.write(f"#SBATCH --output={self.output_name}/log/log_{self.log_name}.txt\n")
+                script.write(f"#SBATCH --error={self.output_name}/err/err_{self.log_name}.txt\n")
             script.write(f"#SBATCH --time={self.run_time}\n")
             script.write(f"#SBATCH --nodes={self.nodes}\n")
             script.write(f"#SBATCH --ntasks={self.ntasks}\n")
