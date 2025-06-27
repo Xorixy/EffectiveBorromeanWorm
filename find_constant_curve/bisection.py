@@ -43,6 +43,7 @@ def start_bisection():
     n_sim = p["n_sim"]
     counter_chi_factor = p["counter_chi_factor"]
     chis = get_chi_list(p)
+    return
     res = try_load_h5(sim_folder + "/result.h5", "x")
     res.create_dataset("sym/P", data=P)
     sym_id = launch_array(sim_folder, size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1, True)
