@@ -128,7 +128,7 @@ def start_new_chi_step(parameters, k_chi):
     exec_loc = parameters["exec_loc"]
     counter_chi_factor = parameters["counter_chi_factor"]
     width = parameters["initial_width"]
-    res = h5.File(sim_folder + "/result.h5", "r+")
+    res = try_load_h5(sim_folder + "/result.h5", "r+")
     print(f"Starting bisection for chi {k_chi}")
     chis = get_chi_list(parameters)
     chi = chis[k_chi]
