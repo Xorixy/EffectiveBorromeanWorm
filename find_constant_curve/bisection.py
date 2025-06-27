@@ -346,6 +346,7 @@ step_parser.set_defaults(func = bisection_step)
 
 start_parser.add_argument("-p", "--parameters", help="Path to parameter file", required = True)
 step_parser.add_argument("--sim_folder", help="Path to the sim folder", required = True)
+step_parser.add_argument("--chi", type=int, help="Which chi id the step corresponds to")
 
 args = parser.parse_args()
 args.func()
