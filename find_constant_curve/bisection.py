@@ -62,11 +62,15 @@ def bisection_step():
     n_sim = p["n_sim"]
     res = try_load_h5(sim_folder + "/result.h5", "r+")
     k_chi = args.k_chi
+    print("k_chi = ", k_chi)
     if k_chi == -1:
+        print("Collecting sym data")
         S_mean, S_var = get_sim_result(sim_folder + "/sim/sym/out/out", n_sim, size, 1)
         res.create_dataset("sym/S", data=S_mean)
         res.create_dataset("sym/S_err", data=np.sqrt(S_var))
+        print("Done")
     else:
+        print("Continuing bisection")
         continue_chi_step(p, k_chi)
 
 def continue_chi_step(parameters, k_chi):
