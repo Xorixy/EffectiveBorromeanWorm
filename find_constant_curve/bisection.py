@@ -212,6 +212,8 @@ def launch_bisection_step(prev_ids, sim_folder, k_chi, n):
     s.set_verbose(True)
     s.set_log_name(f"{k_chi}_{n}")
     command = "python3 " + sim_folder + "/bisection.py" + " step " + "--sim_folder " + sim_folder + " --k_chi " + str(k_chi) + " -n " + str(n)
+    print("Launching bisection step with command : ")
+    print(command)
     s.set_dependency(f"afterany:{prev_ids}")
     s.set_command(command)
     s.run_batch()
