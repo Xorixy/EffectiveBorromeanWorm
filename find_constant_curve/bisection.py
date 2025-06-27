@@ -50,8 +50,8 @@ def start_bisection():
     res = try_load_h5(sim_folder + "/result.h5", "x")
     res.create_dataset("sym/P", data=P)
     sym_id = launch_array(sim_folder + "/sim/sym", size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1, True)
-    launch_bisection_step(sym_id, sim_folder, -1, 1)
     return
+    launch_bisection_step(sym_id, sim_folder, -1, 1)
     for i in range(len(chis)):
         start_new_chi_step(p, i)
 def bisection_step():
@@ -223,6 +223,7 @@ def launch_step_array(loc, size, Ps, chi, n_steps, n_therm, counter_chi_factor, 
 def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, array_start, new_folder):
     settings_loc = loc + "/settings" + str(array_start) + ".h5"
     create_settings_file(settings_loc, size, P, chi, n_steps, n_therm, counter_chi_factor)
+    return
     s = BatchScript()
     s.set_job_name("effborr-bisection")
     s.set_array_start(array_start)
