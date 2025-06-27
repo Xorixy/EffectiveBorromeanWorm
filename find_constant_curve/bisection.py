@@ -25,9 +25,14 @@ def start_bisection():
     p = try_load_json(args.parameters)
     print(p["sim_folder"])
     sim_folder = p["sim_folder"]
+    print("Creating folders...")
     if os.path.isdir(sim_folder):
         raise Exception("Sim folder already exists")
     os.makedirs(sim_folder)
+    chis = get_chi_list(p)
+    os.makedirs(sim_folder + "/sim/sym")
+    for i in range(len(chis)):
+        os.makedirs(sim_folder + "/sim/" + str(i))
     print("Copying parameter file")
     shutil.copyfile(args.parameters, sim_folder + "/bisection.json")
     print("Copying python files")
@@ -42,7 +47,6 @@ def start_bisection():
     n_therm = p["n_therm"]
     n_sim = p["n_sim"]
     counter_chi_factor = p["counter_chi_factor"]
-    chis = get_chi_list(p)
     res = try_load_h5(sim_folder + "/result.h5", "x")
     res.create_dataset("sym/P", data=P)
     sym_id = launch_array(sim_folder + "/sim/sym", size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1, True)
