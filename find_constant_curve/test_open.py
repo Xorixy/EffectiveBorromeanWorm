@@ -20,6 +20,7 @@ while not success and max_tries > 0:
             print("Data found = ", str(data))
             print("Incrementing...")
             f.create_dataset("data", data=(data + 1))
+        success = True
     except:
         print("Failed to open file. Sleeping for 4s...")
         time.sleep(4)
