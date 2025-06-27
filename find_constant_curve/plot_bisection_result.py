@@ -5,7 +5,7 @@ import matplotlib.tri as mtri
 from mpl_toolkits.mplot3d import Axes3D
 
 
-filename = "../data/bis2.h5"
+filename = "../data/bis1.h5"
 f = h5.File(filename, "r")
 n_points_P = 0
 n_points_S = 0
