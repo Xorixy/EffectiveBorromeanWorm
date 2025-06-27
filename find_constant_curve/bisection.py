@@ -64,7 +64,7 @@ def bisection_step():
     res = try_load_h5(sim_folder + "/result.h5", "r+")
     k_chi = args.k_chi
     if k_chi == -1:
-        S_mean, S_var = get_sim_result(sim_folder + "/sim/sym/out", n_sim, size, 1)
+        S_mean, S_var = get_sim_result(sim_folder + "/sim/sym/out/out", n_sim, size, 1)
         res.create_dataset("sym/S", data=S_mean)
         res.create_dataset("sym/S_err", data=np.sqrt(S_var))
     else:
@@ -90,7 +90,7 @@ def continue_chi_step(parameters, k_chi):
     S = res[str(k_chi) + "/S"][:]
     S_err = res[str(k_chi) + "/S_err"][:]
     sim_Ps = Ps[len(S):]
-    sim_S, sim_S_var = get_sim_array_result(sim_folder + f"/sim/{k_chi}/out", n_sim, size, Ps)
+    sim_S, sim_S_var = get_sim_array_result(sim_folder + f"/sim/{k_chi}/out/out", n_sim, size, Ps)
     S = np.append(S, sim_S)
     S_err = np.append(S_err, np.sqrt(sim_S_var))
     del res[str(k_chi) + "/Ps"]
@@ -228,7 +228,7 @@ def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim,
     s.set_job_name("effborr-bisection")
     s.set_array_start(array_start)
     s.set_array_end(array_start + n_sim - 1)
-    out_loc = loc
+    out_loc = loc + "/out"
     print(out_loc)
     if new_folder is True:
         if os.path.isdir(out_loc):
