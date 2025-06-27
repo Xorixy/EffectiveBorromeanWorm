@@ -85,7 +85,6 @@ def continue_chi_step(parameters, k_chi):
     counter_chi_factor = parameters["counter_chi_factor"]
     width = parameters["initial_width"]
     res = try_load_h5(sim_folder + "/result.h5", "r+")
-    k_chi = len(res.keys()) - 2
     print(f"Running step for chi {k_chi}")
     chis = get_chi_list(parameters)
     target_S = res["sym/S"][()]
