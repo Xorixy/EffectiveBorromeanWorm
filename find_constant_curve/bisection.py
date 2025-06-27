@@ -3,10 +3,14 @@ from logging import exception
 import numpy as np
 import h5py as h5
 import os
+
+from numpy.f2py.auxfuncs import throw_error
+
 from batch import BatchScript
 import argparse
 import json
 import shutil
+import time
 
 def get_S(single_stiffness, double_stiffness):
     v = np.pi*single_stiffness - 2
@@ -18,8 +22,7 @@ def estimate_run_time(n_steps, n_therm):
 def start_bisection():
     print("Starting bisection")
     print("Reading parameter file...")
-    with open(args.parameters) as f:
-        p = json.load(f)
+    p = try_load_json(args.parameters)
     print(p["sim_folder"])
     sim_folder = p["sim_folder"]
     if os.path.isdir(sim_folder):
@@ -40,38 +43,29 @@ def start_bisection():
     n_sim = p["n_sim"]
     counter_chi_factor = p["counter_chi_factor"]
     chis = get_chi_list(p)
-    sym_id = launch_array(sim_folder, size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1, True)
-    res = h5.File(sim_folder + "/result.h5", "x")
+    res = try_load_h5(sim_folder + "/result.h5", "x")
     res.create_dataset("sym/P", data=P)
-    launch_bisection_step(sym_id, sim_folder)
+    sym_id = launch_array(sim_folder, size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1, True)
+    launch_bisection_step(sym_id, sim_folder, -1)
+    for i in range(len(chis)):
+        start_new_chi_step(p, i)
 def bisection_step():
     print("Bisection step")
-
-    with open(args.sim_folder + "/bisection.json") as f:
-        p = json.load(f)
+    p = try_load_json(args.sim_folder + "/bisection.json")
     print(p["sim_folder"])
     sim_folder = p["sim_folder"]
     size = p["size"]
-    P = p["initial_P"]
-    n_steps = p["n_steps"]
-    n_therm = p["n_therm"]
     n_sim = p["n_sim"]
-    counter_chi_factor = p["counter_chi_factor"]
-    width = p["initial_width"]
-    res = h5.File(sim_folder + "/result.h5", "r+")
-    k_chi = len(res.keys()) - 2
-    chis = get_chi_list(p)
-    if k_chi == -2:
-        print("This should not happen! Aborting bisection")
-    elif k_chi == -1:
+    res = try_load_h5(sim_folder + "/result.h5", "r+")
+    k_chi = args.k_chi
+    if k_chi == -1:
         S_mean, S_var = get_sim_result(sim_folder + "/sim/out", n_sim, size, 1)
         res.create_dataset("sym/S", data=S_mean)
         res.create_dataset("sym/S_err", data=np.sqrt(S_var))
-        start_new_chi_step(p)
     else:
-        continue_chi_step(p)
+        continue_chi_step(p, k_chi)
 
-def continue_chi_step(parameters):
+def continue_chi_step(parameters, k_chi):
     sim_folder = parameters["sim_folder"]
     size = parameters["size"]
     P = parameters["initial_P"]
@@ -82,7 +76,7 @@ def continue_chi_step(parameters):
     exec_loc = parameters["exec_loc"]
     counter_chi_factor = parameters["counter_chi_factor"]
     width = parameters["initial_width"]
-    res = h5.File(sim_folder + "/result.h5", "r+")
+    res = try_load_h5(sim_folder + "/result.h5", "r+")
     k_chi = len(res.keys()) - 2
     print(f"Running step for chi {k_chi}")
     chis = get_chi_list(parameters)
@@ -105,10 +99,7 @@ def continue_chi_step(parameters):
     res.create_dataset(str(k_chi) + "/S", data=S)
     res.create_dataset(str(k_chi) + "/S_err", data=S_err)
     if len(Ps) >= parameters["max_num_P"]:
-        if k_chi != len(chis) - 1:
-            start_new_chi_step(parameters)
-        else:
-            print("All chis done!")
+        print("All Ps done!")
 
     """
     index_min, index_max = -1, -1
@@ -126,7 +117,7 @@ def continue_chi_step(parameters):
             index_max = i
     """
 
-def start_new_chi_step(parameters):
+def start_new_chi_step(parameters, k_chi):
     sim_folder = parameters["sim_folder"]
     size = parameters["size"]
     P = parameters["initial_P"]
@@ -138,8 +129,7 @@ def start_new_chi_step(parameters):
     counter_chi_factor = parameters["counter_chi_factor"]
     width = parameters["initial_width"]
     res = h5.File(sim_folder + "/result.h5", "r+")
-    k_chi = len(res.keys()) - 1
-    print(f"Starting new chi step for chi {k_chi}")
+    print(f"Starting bisection for chi {k_chi}")
     chis = get_chi_list(parameters)
     chi = chis[k_chi]
     P_mid = P
@@ -169,7 +159,7 @@ def start_new_chi_step(parameters):
     res.create_dataset(str(k_chi) + "/S", data=S)
     res.create_dataset(str(k_chi) + "/S_err", data=S_err)
     res.create_dataset(str(k_chi) + "/chi", data=chi)
-    launch_bisection_step(sim_ids, sim_folder)
+    launch_bisection_step(sim_ids, sim_folder, k_chi, 1)
 
 
 
@@ -206,14 +196,16 @@ def get_Ps_init(P_min, P_max , n_P_parallel):
 def get_Ps_step(P_min, P_max, n_P_parallel):
     return get_Ps_init(P_min, P_max, n_P_parallel)[1:-1]
 
-def launch_bisection_step(prev_ids, sim_folder):
+def launch_bisection_step(prev_ids, sim_folder, k_chi, n):
     s = BatchScript()
     s.set_job_name("effborr-bisection-step")
     s.set_output_name(sim_folder)
     s.set_run_time(3600)
     s.set_verbose(True)
+    s.set_log_name(f"{k_chi}_{n}")
+    command = "python3 " + sim_folder + "/bisection.py" + " step " + "--sim_folder " + sim_folder + " --k_chi " + str(k_chi) + " -n " + str(n)
     s.set_dependency(f"afterany:{prev_ids}")
-    s.set_command("python3 " + sim_folder + "/bisection.py" + " step " + "--sim_folder " + sim_folder)
+    s.set_command(command)
     s.run_batch()
 
 def launch_step_array(loc, size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc):
@@ -311,7 +303,6 @@ def get_sim_result(outfile, n_sims, size, array_start):
     return S_mean, S_var
 
 def get_chi_list(params):
-    return np.array([0, 0.05, 0.1, -0.05, -0.1])
     try:
         chis = np.array(params["chis"])
         if (len(chis) < 1):
@@ -335,7 +326,32 @@ def get_chi_list(params):
                 raise Exception("Chi list switched sign twice. Aborting")
         elif np.sign(chis[i]) != np.sign(chis[i] - chis[i - 1]):
             raise Exception("Chi list is not in increasing absolute value. Aborting")
-    return chis
+    return np.append(0, chis)
+
+def try_load_json(filename):
+    max_tries = 50
+    while max_tries > 0:
+        try:
+            with open(filename) as f:
+                p = json.load(f)
+            return p
+        except:
+            print("Cannot open file. Waiting 1s...")
+            time.sleep(1)
+            max_tries -= 1
+    raise exception("Error. Could not open file " + filename)
+
+def try_load_h5(filename, access):
+    max_tries = 50
+    while max_tries > 0:
+        try:
+            f = h5.File(filename, access)
+            return f
+        except:
+            print("Cannot open file. Waiting 5s...")
+            time.sleep(5)
+            max_tries -= 1
+    raise exception("Error. Could not open file " + filename)
 
 parser = argparse.ArgumentParser(description = "Bisection find constant curve")
 subparsers = parser.add_subparsers(help="Sub-command help", required = True)
@@ -346,8 +362,8 @@ step_parser.set_defaults(func = bisection_step)
 
 start_parser.add_argument("-p", "--parameters", help="Path to parameter file", required = True)
 step_parser.add_argument("--sim_folder", help="Path to the sim folder", required = True)
-step_parser.add_argument("--chi", type=int, help="Which chi id the step corresponds to")
-
+step_parser.add_argument("--k_chi", type=int, help="Which chi id the step corresponds to", required=True)
+step_parser.add_argument("-n", type=int, help = "How many steps we are on", default = 0)
 args = parser.parse_args()
 args.func()
 
