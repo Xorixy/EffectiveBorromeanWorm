@@ -45,7 +45,7 @@ def start_bisection():
     chis = get_chi_list(p)
     res = try_load_h5(sim_folder + "/result.h5", "x")
     res.create_dataset("sym/P", data=P)
-    sym_id = launch_array(sim_folder, size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1, True)
+    sym_id = launch_array(sim_folder + "/sim/sym", size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1, True)
     launch_bisection_step(sym_id, sim_folder, -1, 1)
     return
     for i in range(len(chis)):
@@ -153,7 +153,7 @@ def start_new_chi_step(parameters, k_chi):
     print(Ps)
     print(Ps + chi)
     print(Ps - counter_chi_factor*chi)
-    sim_ids = launch_step_array(sim_folder + f"/{k_chi}", size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc)
+    sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc)
     res.create_dataset(str(k_chi) + "/Ps", data=Ps)
     S = np.array([])
     S_err = np.array([])
