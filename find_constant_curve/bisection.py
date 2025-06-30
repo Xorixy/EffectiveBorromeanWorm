@@ -148,7 +148,9 @@ def start_new_chi_step(parameters, k_chi):
     n_steps = parameters["n_steps"]
     n_therm = parameters["n_therm"]
     n_sim = parameters["n_sim"]
-    n_P_parallel = parameters["init_n_P_parallel"]
+    n_P_parallel = parameters["init_n_P_parallel"] - 2
+    if n_P_parallel < 2:
+        n_P_parallel = 2
     exec_loc = parameters["exec_loc"]
     counter_chi_factor = parameters["counter_chi_factor"]
     res = try_load_h5(sim_folder + "/result.h5", "r+")
