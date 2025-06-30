@@ -1,9 +1,10 @@
 {
-  "initial_P": 0.5,
+  "P_max": 0.5,
+  "P_min": 0.45,
+  "P_sym": 0.4716,
   "chi_max": 0.05,
   "n_chi": 2,
   "n_P_parallel": 2,
-  "initial_width": 0.05,
   "tol" : 1,
   "two_sided" : true,
   "sim_folder" : "/proj/vortex/users/x_algol/effborr/test_bisection",

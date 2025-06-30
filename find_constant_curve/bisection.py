@@ -42,14 +42,14 @@ def start_bisection():
     shutil.copyfile(batch_file, sim_folder + "/batch.py")
     exec_loc = p["exec_loc"]
     size = p["size"]
-    P = p["initial_P"]
+    P_sym = p["P_sym"]
     n_steps = p["n_steps"]
     n_therm = p["n_therm"]
     n_sim = p["n_sim"]
     counter_chi_factor = p["counter_chi_factor"]
     res = try_load_h5(sim_folder + "/result.h5", "x")
-    res.create_dataset("sym/P", data=P)
-    sym_id = launch_array(sim_folder + "/sim/sym", size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1, True)
+    res.create_dataset("sym/P", data=P_sym)
+    sym_id = launch_array(sim_folder + "/sim/sym", size, P_sym, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1, True)
     launch_sym_step(sym_id, sim_folder)
 
 def sym_step():
@@ -100,7 +100,6 @@ def continue_chi_step(parameters, k_chi):
     n_P_parallel = parameters["n_P_parallel"]
     exec_loc = parameters["exec_loc"]
     counter_chi_factor = parameters["counter_chi_factor"]
-    width = parameters["initial_width"]
     res = try_load_h5(sim_folder + "/result.h5", "r+")
     print(f"Running step for chi {k_chi}")
     chis = get_chi_list(parameters)
@@ -144,34 +143,18 @@ def continue_chi_step(parameters, k_chi):
 def start_new_chi_step(parameters, k_chi):
     sim_folder = parameters["sim_folder"]
     size = parameters["size"]
-    P = parameters["initial_P"]
+    P_max = parameters["P_max"]
+    P_min = parameters["P_min"]
     n_steps = parameters["n_steps"]
     n_therm = parameters["n_therm"]
     n_sim = parameters["n_sim"]
     n_P_parallel = parameters["n_P_parallel"]
     exec_loc = parameters["exec_loc"]
     counter_chi_factor = parameters["counter_chi_factor"]
-    width = parameters["initial_width"]
     res = try_load_h5(sim_folder + "/result.h5", "r+")
     print(f"Starting bisection for chi {k_chi}")
     chis = get_chi_list(parameters)
     chi = chis[k_chi]
-    P_mid = P
-    """
-    prev_k, prev_prev_k = get_prev_k_chis(chis, k_chi)
-    if prev_k != -1:
-        prev_chi = chis[prev_k]
-        prev_P = res[str(prev_k) + "/P_est"][()]
-        prev_prev_chi = 0
-        prev_prev_P = P
-        if prev_prev_k != -1:
-            prev_prev_chi = chis[prev_prev_k]
-            prev_prev_P = res[str(prev_prev_k) + "/P_est"][()]
-
-        P_mid = prev_prev_P + (prev_P - prev_prev_P)*(chi - prev_prev_chi)/(prev_chi - prev_prev_chi)
-    """
-    P_max = P_mid + width / 2
-    P_min = P_mid - width / 2
     Ps = get_Ps_init(P_min, P_max, n_P_parallel)
     print(Ps)
     print(Ps + chi)
