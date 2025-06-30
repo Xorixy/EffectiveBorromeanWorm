@@ -50,7 +50,24 @@ def start_bisection():
     res = try_load_h5(sim_folder + "/result.h5", "x")
     res.create_dataset("sym/P", data=P)
     sym_id = launch_array(sim_folder + "/sim/sym", size, P, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1, True)
-    launch_bisection_step(sym_id, sim_folder, -1, 1)
+    launch_sym_step(sym_id, sim_folder)
+
+def sym_step():
+    print("Sym step")
+    print("Reading parameter file...")
+    p = try_load_json(args.sim_folder + "/bisection.json")
+    sim_folder = p["sim_folder"]
+    size = p["size"]
+    n_sim = p["n_sim"]
+    print("Opening res file...")
+    res = try_load_h5(sim_folder + "/result.h5", "r+")
+    print("Collecting sym data...")
+    S_mean, S_var = get_sim_result(sim_folder + "/sim/sym/out/out", n_sim, size, 1)
+    res.create_dataset("sym/S", data=S_mean)
+    res.create_dataset("sym/S_err", data=np.sqrt(S_var))
+    print("Done")
+    print("Launching bisection steps")
+    chis = get_chi_list(p)
     for i in range(len(chis)):
         start_new_chi_step(p, i)
 def bisection_step():
@@ -217,6 +234,20 @@ def launch_bisection_step(prev_ids, sim_folder, k_chi, n):
     s.set_command(command)
     s.run_batch()
 
+def launch_sym_step(prev_ids, sim_folder):
+    s = BatchScript()
+    s.set_job_name("effborr-sym-step")
+    s.set_output_name(sim_folder)
+    s.set_run_time(3600)
+    s.set_verbose(True)
+    s.set_log_name("sym")
+    command = "python3 " + sim_folder + "/bisection.py" + " sym " + "--sim_folder " + sim_folder
+    print("Launching bisection step with command : ")
+    print(command)
+    s.set_dependency(f"afterany:{prev_ids}")
+    s.set_command(command)
+    s.run_batch()
+
 def launch_step_array(loc, size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc):
     sim_ids = str(launch_array(loc, size, Ps[0], chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1, True))
     for i in range(1, len(Ps)):
@@ -366,13 +397,16 @@ parser = argparse.ArgumentParser(description = "Bisection find constant curve")
 subparsers = parser.add_subparsers(help="Sub-command help", required = True)
 start_parser = subparsers.add_parser("start", help="Start bisection")
 step_parser = subparsers.add_parser("step", help="Bisection step")
+sym_parser = subparsers.add_parser("sym", help="Sym step")
 start_parser.set_defaults(func = start_bisection)
 step_parser.set_defaults(func = bisection_step)
+sym_parser.set_defaults(func = sym_step)
 
 start_parser.add_argument("-p", "--parameters", help="Path to parameter file", required = True)
 step_parser.add_argument("--sim_folder", help="Path to the sim folder", required = True)
 step_parser.add_argument("--k_chi", type=int, help="Which chi id the step corresponds to", required=True)
 step_parser.add_argument("-n", type=int, help = "How many steps we are on", default = 0)
+step_parser.add_argument("--sim_folder", help="Path to the sim folder", required = True)
 args = parser.parse_args()
 args.func()
 
