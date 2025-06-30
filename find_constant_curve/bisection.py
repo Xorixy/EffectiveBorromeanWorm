@@ -360,8 +360,8 @@ def try_load_json(filename):
             with open(filename) as f:
                 p = json.load(f)
             return p
-        except:
-            print("Cannot open file. Waiting 1s...")
+        except Exception as e:
+            print(f"Cannot open file, error {e}.\nWaiting 5s...")
             time.sleep(1)
             max_tries -= 1
     raise exception("Error. Could not open file " + filename)
@@ -372,8 +372,8 @@ def try_load_h5(filename, access):
         try:
             f = h5.File(filename, access)
             return f
-        except:
-            print("Cannot open file. Waiting 5s...")
+        except Exception as e:
+            print(f"Cannot open file, error {e}.\nWaiting 5s...")
             time.sleep(5)
             max_tries -= 1
     raise exception("Error. Could not open file " + filename)
