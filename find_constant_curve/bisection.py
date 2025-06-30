@@ -406,7 +406,7 @@ start_parser.add_argument("-p", "--parameters", help="Path to parameter file", r
 step_parser.add_argument("--sim_folder", help="Path to the sim folder", required = True)
 step_parser.add_argument("--k_chi", type=int, help="Which chi id the step corresponds to", required=True)
 step_parser.add_argument("-n", type=int, help = "How many steps we are on", default = 0)
-step_parser.add_argument("--sim_folder", help="Path to the sim folder", required = True)
+sym_parser.add_argument("--sim_folder", help="Path to the sim folder", required = True)
 args = parser.parse_args()
 args.func()
 
