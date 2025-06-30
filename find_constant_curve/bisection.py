@@ -93,7 +93,6 @@ def bisection_step():
 def continue_chi_step(parameters, k_chi):
     sim_folder = parameters["sim_folder"]
     size = parameters["size"]
-    P = parameters["initial_P"]
     n_steps = parameters["n_steps"]
     n_therm = parameters["n_therm"]
     n_sim = parameters["n_sim"]
