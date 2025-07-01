@@ -109,6 +109,7 @@ def bisection_step():
         continue_chi_step(p, k_chi)
 
 def continue_chi_step(parameters, k_chi):
+    n = args.n
     print(f"Bisection step : {n}")
     sim_folder = parameters["sim_folder"]
     size = parameters["size"]
@@ -144,7 +145,6 @@ def continue_chi_step(parameters, k_chi):
     res.create_dataset(str(k_chi) + "/S", data=S)
     res.create_dataset(str(k_chi) + "/S_err", data=S_err)
     edges = find_bis_edges(S, S_err, target_S, target_S_err, tol)
-    n = args.n
     if n_bis < n:
         print(f"All bisections done ({n - 1}/{n_bis} bisection steps performed in total)")
         res.create_dataset(str(k_chi) + "/Ps", data=Ps)
