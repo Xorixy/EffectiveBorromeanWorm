@@ -152,6 +152,10 @@ def continue_chi_step(parameters, k_chi):
         print(f"Bisection done to target precision ({n - 1}/{n_bis} bisection steps performed in total)")
         res.create_dataset(str(k_chi) + "/Ps", data=Ps)
     else:
+        print(f'Target S : {target_S}')
+        print(f"Following edges found:")
+        for edge in edges:
+            print(f"(P = {Ps[edge[0]]}, S = {S[edge[0]]}), (P = {Ps[edge[1]]}, S = {S[edge[1]]})")
         print(f"Launching new bisection step")
         new_Ps = np.array([])
         for edge in edges:
