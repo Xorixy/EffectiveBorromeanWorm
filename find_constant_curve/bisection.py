@@ -25,8 +25,8 @@ def is_valid_distance(s1, s2, err1, err2, tol_factor):
 def find_bis_edges(s, s_err, st, st_err, tol_factor):
     edges = np.array([])
     for i in range(1,len(s)):
-        sign_prev = s[i-1] - st
-        sign_next = s[i] - st
+        sign_prev = np.sign(s[i-1] - st)
+        sign_next = np.sign(s[i] - st)
         if sign_prev != sign_next:
             if is_valid_distance(s[i], st, s_err[i], st_err, tol_factor) and is_valid_distance(s[i - 1], st, s_err[i - 1], st_err, tol_factor):
                 if len(edges) == 0:
