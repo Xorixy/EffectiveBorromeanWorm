@@ -155,8 +155,10 @@ def continue_chi_step(parameters, k_chi):
         print(f"Launching new bisection step")
         new_Ps = np.array([])
         for edge in edges:
-            new_Ps = np.append(new_Ps, get_Ps_step(edge[0], edge[1], n_P_parallel))
+            new_Ps = np.append(new_Ps, get_Ps_step(Ps[edge[0]], Ps[edge[1]], n_P_parallel))
         Ps = np.append(Ps, new_Ps)
+        print("New Ps to simulate:")
+        print(new_Ps)
         res.create_dataset(str(k_chi) + "/Ps", data=Ps)
         sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, new_Ps, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc)
         launch_bisection_step(sim_ids, sim_folder, k_chi, n + 1)
