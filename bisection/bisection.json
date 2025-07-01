@@ -17,5 +17,5 @@
   "counter_chi_factor" : 2,
   "python_file" : "bisection.py",
   "batch_file" : "batch.py",
-  "max_num_P" : 5
+  "n_bis" : 0
 }
