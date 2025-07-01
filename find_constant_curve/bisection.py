@@ -275,10 +275,17 @@ def launch_sym_step(prev_ids, sim_folder):
     s.run_batch()
 
 def launch_step_array(loc, size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc):
-    sim_ids = str(launch_array(loc, size, Ps[0], chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1, True))
-    for i in range(1, len(Ps)):
-        sim_ids += ","
-        sim_ids += str(launch_array(loc, size, Ps[i], chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1 + i*n_sim, False))
+    sim_ids = ""
+    new_folder = True
+    for i in range(len(Ps)):
+        sim_id = str(launch_array(loc, size, Ps[i], chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1 + i*n_sim, new_folder))
+        if sim_id is not None:
+            if sim_ids == "":
+                sim_ids = sim_id
+            else:
+                sim_ids += ","
+                sim_ids += sim_id
+        new_folder = False
     return sim_ids
 
 def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, array_start, new_folder):
