@@ -153,8 +153,6 @@ def continue_chi_step(parameters, k_chi):
         res.create_dataset(str(k_chi) + "/Ps", data=Ps)
     else:
         print(f"Launching new bisection step")
-        n_bis -= 1
-        res.create_dataset(str(k_chi) + "/n_bis", data=n_bis)
         new_Ps = np.array([])
         for edge in edges:
             new_Ps = np.append(new_Ps, get_Ps_step(edge[0], edge[1], n_P_parallel))
