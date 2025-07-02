@@ -22,17 +22,24 @@ def estimate_run_time(n_steps, n_therm):
 
 def is_valid_distance(s1, s2, err1, err2, tol_factor):
     return np.abs(s1 - s2) > tol_factor*(err1 + err2)
-def find_bis_edges(s, s_err, st, st_err, tol_factor):
+def find_bis_edges(p, s, s_err, st, st_err, tol_factor):
     edges = np.array([])
+    print(f"Target S : {st} +- {tol_factor} * {st_err}")
     for i in range(1,len(s)):
         sign_prev = np.sign(s[i-1] - st)
         sign_next = np.sign(s[i] - st)
         if sign_prev != sign_next:
+            print("Edge found :")
+            print(f"P : {p[i-1]} , S : {s[i-1]} +- {tol_factor} * {s_err[i-1]}")
+            print(f"P : {p[i]} , S : {s[i]} +- {tol_factor} * {s_err[i]}")
             if is_valid_distance(s[i], st, s_err[i], st_err, tol_factor) and is_valid_distance(s[i - 1], st, s_err[i - 1], st_err, tol_factor):
                 if len(edges) == 0:
                     edges = np.array([[i-1, i]])
                 else:
                     edges = np.append(edges, [[i-1, i]], axis=0)
+            else:
+                print("Edge equals target S within tolerance.")
+
     return edges
 
 def start_bisection():
@@ -144,7 +151,7 @@ def continue_chi_step(parameters, k_chi):
     S_err = S_err[sort]
     res.create_dataset(str(k_chi) + "/S", data=S)
     res.create_dataset(str(k_chi) + "/S_err", data=S_err)
-    edges = find_bis_edges(S, S_err, target_S, target_S_err, tol)
+    edges = find_bis_edges(Ps, S, S_err, target_S, target_S_err, tol)
     if n_bis < n:
         print(f"All bisections done.\n{n - 1}/{n_bis} bisection steps performed in total.")
         res.create_dataset(str(k_chi) + "/Ps", data=Ps)
