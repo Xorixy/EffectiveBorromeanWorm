@@ -397,20 +397,7 @@ def get_chi_list(params):
         chis = np.linspace(0, chi_max, n_chis + 1)[1:]
     if params["two_sided"]:
         chis = np.append(chis, -chis)
-    switched_sign = False
-    for i in range(1, len(chis)):
-        if chis[i] == 0:
-            raise Exception("Chi list contains zero. Aborting")
-        if chis[i-1] == 0:
-            raise Exception("Chi list contains zero. Aborting")
-        if np.sign(chis[i]) != np.sign(chis[i - 1]):
-            if not switched_sign:
-                switched_sign = True
-            else:
-                raise Exception("Chi list switched sign twice. Aborting")
-        elif np.sign(chis[i]) != np.sign(chis[i] - chis[i - 1]):
-            raise Exception("Chi list is not in increasing absolute value. Aborting")
-    return np.append(0, chis)
+    return chis
 
 def try_load_json(filename):
     max_tries = 50
