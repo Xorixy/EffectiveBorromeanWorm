@@ -50,12 +50,16 @@ def start_bisection():
     sim_folder = p["sim_folder"]
     print("Creating folders...")
     if os.path.isdir(sim_folder):
-        raise Exception("Sim folder already exists")
-    os.makedirs(sim_folder)
+        if not args.cont:
+            raise Exception("Sim folder already exists")
+    elif args.cont:
+        raise Exception("Sim folder doesn't exist and cont flag was given")
     chis = get_chi_list(p)
-    os.makedirs(sim_folder + "/sim/sym")
-    for i in range(len(chis)):
-        os.makedirs(sim_folder + "/sim/" + str(i))
+    if not args.cont:
+        os.makedirs(sim_folder)
+        os.makedirs(sim_folder + "/sim/sym")
+        for i in range(len(chis)):
+            os.makedirs(sim_folder + "/sim/" + str(i))
     print("Copying parameter file")
     shutil.copyfile(args.parameters, sim_folder + "/bisection.json")
     print("Copying python files")
@@ -71,11 +75,18 @@ def start_bisection():
     n_sim = p["n_sim"]
     counter_chi_factor = p["counter_chi_factor"]
     print(f"Estimated runtime : {estimate_run_time(n_steps, n_therm)}s")
-    res = try_load_h5(sim_folder + "/result.h5", "x")
-    res.create_dataset("sym/P", data=P_sym)
-    res.create_dataset("sym/size", data=size)
-    sym_id = launch_array(sim_folder + "/sim/sym", size, P_sym, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1, True)
-    launch_sym_step(sym_id, sim_folder)
+    if not args.cont:
+        print("Launching sym step")
+        res = try_load_h5(sim_folder + "/result.h5", "x")
+        res.create_dataset("sym/P", data=P_sym)
+        res.create_dataset("sym/size", data=size)
+        sym_id = launch_array(sim_folder + "/sim/sym", size, P_sym, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1, True)
+        launch_sym_step(sym_id, sim_folder)
+    else:
+        print("Launching chi steps")
+        for i in range(len(chis)):
+            start_new_chi_step(p, i)
+
 
 def sym_step():
     print("Sym step")
@@ -434,6 +445,7 @@ step_parser.set_defaults(func = bisection_step)
 sym_parser.set_defaults(func = sym_step)
 
 start_parser.add_argument("-p", "--parameters", help="Path to parameter file", required = True)
+start_parser.add_argument("--cont", action="store_true", help="If this flag is given then we continue a previous bisection with new chis")
 step_parser.add_argument("--sim_folder", help="Path to the sim folder", required = True)
 step_parser.add_argument("--k_chi", type=int, help="Which chi id the step corresponds to", required=True)
 step_parser.add_argument("-n", type=int, help = "How many steps we are on", default = 0)
