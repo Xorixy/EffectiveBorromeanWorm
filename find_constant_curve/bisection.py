@@ -60,13 +60,23 @@ def start_bisection():
         os.makedirs(sim_folder + "/sim/sym")
         for i in range(len(chis)):
             os.makedirs(sim_folder + "/sim/" + str(i))
-    print("Copying parameter file")
-    shutil.copyfile(args.parameters, sim_folder + "/bisection.json")
-    print("Copying python files")
-    python_file = p["python_file"]
-    shutil.copyfile(python_file, sim_folder + "/bisection.py")
-    batch_file = p["batch_file"]
-    shutil.copyfile(batch_file, sim_folder + "/batch.py")
+        p["chis"] = chis.tolist()
+        print("Writing parameters file")
+        with open(sim_folder + "/params.json", "w") as f:
+            json.dump(p, f, indent=4)
+        print("Copying python files")
+        python_file = p["python_file"]
+        shutil.copyfile(python_file, sim_folder + "/bisection.py")
+        batch_file = p["batch_file"]
+        shutil.copyfile(batch_file, sim_folder + "/batch.py")
+    else:
+        old_params = try_load_json(sim_folder + "/params.json")
+        old_chis = get_chi_list(old_params)
+        chis = np.append(old_chis, chis).tolist()
+        old_params["chis"] = chis
+        with open(sim_folder + "/params.json", "w") as f:
+            json.dump(old_params, f, indent=4)
+        p = try_load_json(sim_folder + "/params.json")
     exec_loc = p["exec_loc"]
     size = p["size"]
     P_sym = p["P_sym"]
@@ -84,7 +94,7 @@ def start_bisection():
         launch_sym_step(sym_id, sim_folder)
     else:
         print("Launching chi steps")
-        for i in range(len(chis)):
+        for i in range(len(old_chis), len(chis)):
             start_new_chi_step(p, i)
 
 
@@ -405,10 +415,9 @@ def get_chi_list(params):
     except:
         n_chis = params["n_chi"]
         chi_max = params["chi_max"]
-        chis = np.linspace(0, chi_max, n_chis + 1)[1:]
-    if params["two_sided"]:
-        chis = np.append(chis, -chis)
-    return chis
+        chi_min = params["chi_min"]
+        chis = np.linspace(chi_min, chi_max, n_chis)[:]
+    return np.unique(chis)
 
 def try_load_json(filename):
     max_tries = 50
