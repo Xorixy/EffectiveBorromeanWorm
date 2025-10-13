@@ -87,6 +87,7 @@ def start_bisection():
     print(f"Estimated runtime : {estimate_run_time(n_steps, n_therm)}s")
     if not args.cont:
         print("Launching sym step")
+        n_sim = p["n_sim_sym"]
         res = try_load_h5(sim_folder + "/result.h5", "x")
         res.create_dataset("sym/P", data=P_sym)
         res.create_dataset("sym/size", data=size)
