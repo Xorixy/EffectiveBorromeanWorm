@@ -430,7 +430,7 @@ def try_load_json(filename):
             print(f"Cannot open file, error {e}.\nWaiting 5s...")
             time.sleep(1)
             max_tries -= 1
-    raise exception("Error. Could not open file " + filename)
+    raise Exception("Error. Could not open file " + filename)
 
 def try_load_h5(filename, access):
     max_tries = 50
@@ -442,7 +442,7 @@ def try_load_h5(filename, access):
             print(f"Cannot open file, error {e}.\nWaiting 5s...")
             time.sleep(5)
             max_tries -= 1
-    raise exception("Error. Could not open file " + filename)
+    raise Exception("Error. Could not open file " + filename)
 
 parser = argparse.ArgumentParser(description = "Bisection find constant curve")
 subparsers = parser.add_subparsers(help="Sub-command help", required = True)
