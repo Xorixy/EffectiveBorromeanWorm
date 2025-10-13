@@ -353,9 +353,9 @@ def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim,
 
 def create_settings_file(settings_loc, size, P, chi, n_steps, n_therm, counter_chi_factor):
     with h5.File(settings_loc, "w") as f:
-        f["settings/save/windings"] = np.bool(True)
-        f["settings/save/correlations"] = np.bool(False)
-        f["settings/save/time_series"] = np.bool(False)
+        f["settings/save/windings"] = True
+        f["settings/save/correlations"] = False
+        f["settings/save/time_series"] = False
 
         f["settings/sim/size_x"] = np.int32(size)
         f["settings/sim/size_y"] = np.int32(size)
