@@ -104,7 +104,7 @@ def sym_step():
     p = try_load_json(args.sim_folder + "/params.json")
     sim_folder = p["sim_folder"]
     size = p["size"]
-    n_sim = p["n_sim"]
+    n_sim = p["n_sim_sym"]
     print("Opening res file...")
     res = try_load_h5(sim_folder + "/result.h5", "r+")
     print("Collecting sym data...")
