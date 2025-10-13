@@ -101,7 +101,7 @@ def start_bisection():
 def sym_step():
     print("Sym step")
     print("Reading parameter file...")
-    p = try_load_json(args.sim_folder + "/bisection.json")
+    p = try_load_json(args.sim_folder + "/params.json")
     sim_folder = p["sim_folder"]
     size = p["size"]
     n_sim = p["n_sim"]
@@ -118,7 +118,7 @@ def sym_step():
         start_new_chi_step(p, i)
 def bisection_step():
     print("Bisection step")
-    p = try_load_json(args.sim_folder + "/bisection.json")
+    p = try_load_json(args.sim_folder + "/params.json")
     print(p["sim_folder"])
     sim_folder = p["sim_folder"]
     size = p["size"]
