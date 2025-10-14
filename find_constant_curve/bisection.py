@@ -150,10 +150,10 @@ def continue_chi_step(parameters, k_chi):
     counter_chi_factor = parameters["counter_chi_factor"]
     tol = parameters["tol"]
     res = try_load_h5(sim_folder + "/result.h5", "r+")
+    Ps = res[str(k_chi) + "/Ps"][()]
     chis = get_chi_list(parameters)
     chi = chis[k_chi]
     print(f"Running step for chi {k_chi}")
-    chis = get_chi_list(parameters)
     target_S = res["sym/S"][()]
     target_S_err = res["sym/S_err"][()]
     Ps = res[str(k_chi) + "/Ps"][()]
@@ -173,28 +173,37 @@ def continue_chi_step(parameters, k_chi):
     S_err = S_err[sort]
     res.create_dataset(str(k_chi) + "/S", data=S)
     res.create_dataset(str(k_chi) + "/S_err", data=S_err)
-    edges = find_bis_edges(Ps, S, S_err, target_S, target_S_err, tol)
-    if n_bis < n:
-        print(f"All bisections done.\n{n - 1}/{n_bis} bisection steps performed in total.")
-        res.create_dataset(str(k_chi) + "/Ps", data=Ps)
-    elif len(edges) == 0:
-        print(f"No edge found or bisection done to target precision.\n{n - 1}/{n_bis} bisection steps performed in total.")
-        res.create_dataset(str(k_chi) + "/Ps", data=Ps)
-    else:
-        print(f'Target S : {target_S}')
-        print(f"Following edges found:")
-        for edge in edges:
-            print(f"(P = {Ps[edge[0]]}, S = {S[edge[0]]}), (P = {Ps[edge[1]]}, S = {S[edge[1]]})")
-        print(f"Launching new bisection step")
-        new_Ps = np.array([])
-        for edge in edges:
-            new_Ps = np.append(new_Ps, get_Ps_step(Ps[edge[0]], Ps[edge[1]], n_P_parallel))
-        Ps = np.append(Ps, new_Ps)
-        print("New Ps to simulate:")
-        print(new_Ps)
+    if len(Ps) == 1:
+        print("Only P_min simulated. Running step for P_max so that bisection can start")
+        P_max = parameters["P_max"]
+        new_Ps = np.array([P_max])
+        Ps = np.append(Ps, P_max)
         res.create_dataset(str(k_chi) + "/Ps", data=Ps)
         sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, new_Ps, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc)
         launch_bisection_step(sim_ids, sim_folder, k_chi, n + 1)
+    else:
+        edges = find_bis_edges(Ps, S, S_err, target_S, target_S_err, tol)
+        if n_bis < n:
+            print(f"All bisections done.\n{n - 1}/{n_bis} bisection steps performed in total.")
+            res.create_dataset(str(k_chi) + "/Ps", data=Ps)
+        elif len(edges) == 0:
+            print(f"No edge found or bisection done to target precision.\n{n - 1}/{n_bis} bisection steps performed in total.")
+            res.create_dataset(str(k_chi) + "/Ps", data=Ps)
+        else:
+            print(f'Target S : {target_S}')
+            print(f"Following edges found:")
+            for edge in edges:
+                print(f"(P = {Ps[edge[0]]}, S = {S[edge[0]]}), (P = {Ps[edge[1]]}, S = {S[edge[1]]})")
+            print(f"Launching new bisection step")
+            new_Ps = np.array([])
+            for edge in edges:
+                new_Ps = np.append(new_Ps, get_Ps_step(Ps[edge[0]], Ps[edge[1]], n_P_parallel))
+            Ps = np.append(Ps, new_Ps)
+            print("New Ps to simulate:")
+            print(new_Ps)
+            res.create_dataset(str(k_chi) + "/Ps", data=Ps)
+            sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, new_Ps, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc)
+            launch_bisection_step(sim_ids, sim_folder, k_chi, n + 1)
 
 """
     index_min, index_max = -1, -1
@@ -222,15 +231,15 @@ def start_new_chi_step(parameters, k_chi):
     n_sim = parameters["n_sim"]
     n_bis = parameters["n_bis"]
     n_P_parallel = parameters["init_n_P_parallel"] - 2
-    if n_P_parallel < 1:
-        n_P_parallel = 1
     exec_loc = parameters["exec_loc"]
     counter_chi_factor = parameters["counter_chi_factor"]
     res = try_load_h5(sim_folder + "/result.h5", "r+")
     print(f"Starting bisection for chi {k_chi}")
     chis = get_chi_list(parameters)
     chi = chis[k_chi]
-    Ps = get_Ps_init(P_min, P_max, n_P_parallel)
+    Ps = P_min
+    if n_P_parallel >= 0:
+        Ps = get_Ps_init(P_min, P_max, n_P_parallel)
     print(Ps)
     print(Ps + chi)
     print(Ps - counter_chi_factor*chi)
@@ -243,9 +252,6 @@ def start_new_chi_step(parameters, k_chi):
     res.create_dataset(str(k_chi) + "/S_err", data=S_err)
     res.create_dataset(str(k_chi) + "/chi", data=chi)
     launch_bisection_step(sim_ids, sim_folder, k_chi, 1)
-
-
-
 
 def get_prev_k_chis(chis, k_chi):
     #This function returns the k_chis of the previous and previous-previous steps in the same chi direction as before.
