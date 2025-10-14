@@ -237,7 +237,7 @@ def start_new_chi_step(parameters, k_chi):
     print(f"Starting bisection for chi {k_chi}")
     chis = get_chi_list(parameters)
     chi = chis[k_chi]
-    Ps = P_min
+    Ps = np.array([P_min])
     if n_P_parallel >= 0:
         Ps = get_Ps_init(P_min, P_max, n_P_parallel)
     print(Ps)
