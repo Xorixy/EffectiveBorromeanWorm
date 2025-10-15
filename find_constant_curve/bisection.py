@@ -175,13 +175,18 @@ def continue_chi_step(parameters, k_chi):
     Ps = Ps[sort]
     S = S[sort]
     S_err = S_err[sort]
+    print("Writing to file:")
+    print("S : ", S)
     res.create_dataset(str(k_chi) + "/S", data=S)
+    print("S_err : ", S_err)
     res.create_dataset(str(k_chi) + "/S_err", data=S_err)
     if len(Ps) == 1:
         print("Only P_min simulated. Running step for P_max so that bisection can start")
         P_max = parameters["P_max"]
         new_Ps = np.array([P_max])
         Ps = np.append(Ps, P_max)
+        print("Writing to file:")
+        print("Ps : ", Ps)
         res.create_dataset(str(k_chi) + "/Ps", data=Ps)
         sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, new_Ps, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc)
         launch_bisection_step(sim_ids, sim_folder, k_chi, n + 1)
