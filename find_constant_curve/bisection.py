@@ -86,11 +86,12 @@ def start_bisection():
     print(f"Estimated runtime : {estimate_run_time(n_steps, n_therm)}s")
     if not args.cont:
         print("Launching sym step")
-        n_sim = p["n_sim_sym"]
+        n_parallel = p["n_parallel"]
+        n_array_sym = p["n_array_sym"]
         res = try_load_h5(sim_folder + "/result.h5", "x")
         res.create_dataset("sym/P", data=P_sym)
         res.create_dataset("sym/size", data=size)
-        sym_id = launch_array(sim_folder + "/sim/sym", size, P_sym, 0, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1, True)
+        sym_id = launch_array(sim_folder + "/sim/sym", size, P_sym, 0, n_steps, n_therm, counter_chi_factor, n_parallel, n_array_sym, exec_loc, 1, True)
         launch_sym_step(sym_id, sim_folder)
     else:
         print("Launching chi steps")
