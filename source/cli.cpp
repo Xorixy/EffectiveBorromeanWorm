@@ -47,7 +47,7 @@ int cli::parse(int argc, char *argv[]) {
             logger::log->info("CLI Random: {}", old_seed);
             logger::log->info("Number of parallel steps: {}", settings::io::num_parallel);
             logger::log->info("Random seed: {}", settings::random::seed);
-            logger::log->info("Saving file as {}_{}.h5", settings::io::filename, task_id);
+            logger::log->info("Saving file as {}_{}.h5", settings::io::filename, settings::random::seed);
             settings::io::filename += "_" + std::string(task_id) + ".h5";
         } else {
             logger::log = spdlog::stdout_color_mt(fmt::format("EffBor [{}]", settings::random::seed), spdlog::color_mode::always);
