@@ -47,8 +47,6 @@ int cli::parse(int argc, char *argv[]) {
             logger::log->info("CLI Random: {}", old_seed);
             logger::log->info("Number of parallel steps: {}", settings::io::num_parallel);
             logger::log->info("Random seed: {}", settings::random::seed);
-            logger::log->info("Saving file as {}_{}.h5", settings::io::filename, settings::random::seed);
-            settings::io::filename += "_" + std::to_string(settings::random::seed) + ".h5";
         } else {
             logger::log = spdlog::stdout_color_mt(fmt::format("EffBor [{}]", settings::random::seed), spdlog::color_mode::always);
             logger::log->set_level(static_cast<spdlog::level::level_enum>(settings::log::level));
@@ -56,6 +54,9 @@ int cli::parse(int argc, char *argv[]) {
             logger::log->info("Random seed: {}", settings::random::seed);
         }
     }
+    settings::io::filename += "_" + std::to_string(settings::random::seed) + ".h5";
+    logger::log->info("Saving file as {}", settings::io::filename);
+    logger::log->info("Settings file : {}", settings::io::settings_path);
 
     logger::log->info("Loading settings... ");
 
@@ -67,7 +68,6 @@ int cli::parse(int argc, char *argv[]) {
             return 1;
         }
     }
-    logger::log->info("Settings file : {}", settings::io::settings_path);
     io::load_settings();
 
     settings::worm::single_to_counter_ratio = settings::sim::counter_weight/settings::sim::single_weight;
