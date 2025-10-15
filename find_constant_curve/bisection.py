@@ -110,7 +110,7 @@ def sym_step():
     print("Opening res file...")
     res = try_load_h5(sim_folder + "/result.h5", "r+")
     print("Collecting sym data...")
-    S_mean, S_var = get_sim_result(sim_folder + "/sim/sym/out/out", n_array_sym, size, 1)
+    S_mean, S_var = get_sim_result(sim_folder + "/sim/sym/out/out", n_array_sym, size, 0)
     res.create_dataset("sym/S", data=S_mean)
     res.create_dataset("sym/S_err", data=np.sqrt(S_var))
     print("Done")
@@ -132,7 +132,7 @@ def bisection_step():
     print("k_chi = ", k_chi)
     if k_chi == -1:
         print("Collecting sym data")
-        S_mean, S_var = get_sim_result(sim_folder + "/sim/sym/out/out", n_parallel*n_array_sym, size, 1)
+        S_mean, S_var = get_sim_result(sim_folder + "/sim/sym/out/out", n_parallel*n_array_sym, size, 0)
         res.create_dataset("sym/S", data=S_mean)
         res.create_dataset("sym/S_err", data=np.sqrt(S_var))
         print("Done")
@@ -322,7 +322,7 @@ def launch_step_array(loc, size, Ps, chi, n_steps, n_therm, counter_chi_factor, 
     sim_ids = ""
     new_folder = True
     for i in range(len(Ps)):
-        sim_id = str(launch_array(loc, size, Ps[i], chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, 1 + i*n_array, new_folder))
+        sim_id = str(launch_array(loc, size, Ps[i], chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, i*n_array, new_folder))
         if sim_id is not None:
             if sim_ids == "":
                 sim_ids = sim_id
@@ -387,7 +387,7 @@ def get_sim_array_result(outfile, n_sims, size, Ps):
     S_means = np.zeros(len(Ps))
     S_vars  = np.zeros(len(Ps))
     for i in range(len(Ps)):
-        S_mean, S_var = get_sim_result(outfile, n_sims, size, 1 + i*n_sims)
+        S_mean, S_var = get_sim_result(outfile, n_sims, size, i*n_sims)
         S_means[i] = S_mean
         S_vars[i] = S_var
     return S_means, S_vars
