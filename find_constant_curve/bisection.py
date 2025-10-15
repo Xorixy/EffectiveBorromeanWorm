@@ -358,6 +358,8 @@ def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_para
     s.set_run_time(estimate_run_time(n_steps, n_therm))
     s.set_verbose(True)
 
+    s.set_ntasks(n_parallel)
+
     parallel_string = ""
     for i in range(n_parallel):
         parallel_string += f"{i} "
