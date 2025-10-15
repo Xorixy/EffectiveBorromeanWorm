@@ -12,15 +12,11 @@
 int main(int argc, char * argv[]) {
     std::chrono::time_point<std::chrono::steady_clock> start_time;
     start_time = std::chrono::steady_clock::now();
-    logger::log = spdlog::stdout_color_mt("EffBor", spdlog::color_mode::always);
-    logger::log->set_level(static_cast<spdlog::level::level_enum>(settings::log::level));
-    logger::log->info("Loading settings... ");
+
     int cliout;
-    try {
-        cliout = cli::parse(argc, argv);
-    } catch (std::exception& e) {
-        fmt::print("File error: {}\n", e.what());
-    }
+
+    cliout = cli::parse(argc, argv);
+
     switch (cliout) {
         //This means that the user has saved settings data to a file and wants to quit,
         case 1:

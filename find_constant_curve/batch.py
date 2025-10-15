@@ -15,7 +15,7 @@ class BatchScript:
         self.memory = None
         self.reservation = None
         self.dependency = None
-        self.nodes = 1
+        self.nodes = None
         self.ntasks = 1
         self.cpu_per_task = 1
         self.openmp = False
@@ -84,7 +84,8 @@ class BatchScript:
                 script.write(f"#SBATCH --output={self.output_name}/log/log_{self.log_name}.txt\n")
                 script.write(f"#SBATCH --error={self.output_name}/err/err_{self.log_name}.txt\n")
             script.write(f"#SBATCH --time={self.run_time}\n")
-            script.write(f"#SBATCH --nodes={self.nodes}\n")
+            if self.nodes is not None:
+                script.write(f"#SBATCH --nodes={self.nodes}\n")
             script.write(f"#SBATCH --ntasks={self.ntasks}\n")
             script.write(f"#SBATCH --cpus-per-task={self.cpu_per_task}\n")
             if self.array_start is not None and self.array_end is not None:

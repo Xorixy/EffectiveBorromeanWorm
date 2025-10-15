@@ -70,7 +70,7 @@ def plot_res(P, chi, S, S_err, P_bis, chi_bis, P_sym, target_S):
     ax_cont.set_ylabel('chi')
     ax_cont.set_ylim(1.1*np.array([np.min(chi), np.max(chi)]))
 
-    return
+
 
     fig = plt.figure(figsize=(16, 10))
     ax = fig.add_subplot(1,1,1, projection='3d')
@@ -133,7 +133,7 @@ def plot_bisection_result(filenames):
 
 #filenames = ["../data/bis_test4.h5", "../data/bis_test5.h5"]
 #filenames = ["../data/bis_bid3.h5"]
-filenames = ["../data/bis_50_2.h5"]
+filenames = ["../data/30_bisection.h5"]
 
 plot_bisection_result(filenames)
 

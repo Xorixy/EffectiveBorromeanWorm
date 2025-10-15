@@ -82,7 +82,6 @@ def start_bisection():
     P_sym = p["P_sym"]
     n_steps = p["n_steps"]
     n_therm = p["n_therm"]
-    n_sim = p["n_sim"]
     counter_chi_factor = p["counter_chi_factor"]
     print(f"Estimated runtime : {estimate_run_time(n_steps, n_therm)}s")
     if not args.cont:
@@ -105,11 +104,12 @@ def sym_step():
     p = try_load_json(args.sim_folder + "/params.json")
     sim_folder = p["sim_folder"]
     size = p["size"]
-    n_sim = p["n_sim_sym"]
+    n_parallel = p["n_parallel"]
+    n_array_sym = p["n_array_sym"]
     print("Opening res file...")
     res = try_load_h5(sim_folder + "/result.h5", "r+")
     print("Collecting sym data...")
-    S_mean, S_var = get_sim_result(sim_folder + "/sim/sym/out/out", n_sim, size, 1)
+    S_mean, S_var = get_sim_result(sim_folder + "/sim/sym/out/out", n_array_sym, size, 1)
     res.create_dataset("sym/S", data=S_mean)
     res.create_dataset("sym/S_err", data=np.sqrt(S_var))
     print("Done")
@@ -123,13 +123,15 @@ def bisection_step():
     print(p["sim_folder"])
     sim_folder = p["sim_folder"]
     size = p["size"]
-    n_sim = p["n_sim"]
+    n_parallel = p["n_parallel"]
+    n_array = p["n_array"]
+    n_array_sym = p["n_array_sym"]
     res = try_load_h5(sim_folder + "/result.h5", "r+")
     k_chi = args.k_chi
     print("k_chi = ", k_chi)
     if k_chi == -1:
         print("Collecting sym data")
-        S_mean, S_var = get_sim_result(sim_folder + "/sim/sym/out/out", n_sim, size, 1)
+        S_mean, S_var = get_sim_result(sim_folder + "/sim/sym/out/out", n_parallel*n_array_sym, size, 1)
         res.create_dataset("sym/S", data=S_mean)
         res.create_dataset("sym/S_err", data=np.sqrt(S_var))
         print("Done")
@@ -144,7 +146,8 @@ def continue_chi_step(parameters, k_chi):
     size = parameters["size"]
     n_steps = parameters["n_steps"]
     n_therm = parameters["n_therm"]
-    n_sim = parameters["n_sim"]
+    n_parallel = parameters["n_parallel"]
+    n_array = parameters["n_array"]
     n_P_parallel = parameters["n_P_parallel"]
     exec_loc = parameters["exec_loc"]
     counter_chi_factor = parameters["counter_chi_factor"]
@@ -160,7 +163,7 @@ def continue_chi_step(parameters, k_chi):
     S = res[str(k_chi) + "/S"][()]
     S_err = res[str(k_chi) + "/S_err"][()]
     sim_Ps = Ps[len(S):]
-    sim_S, sim_S_var = get_sim_array_result(sim_folder + f"/sim/{k_chi}/out/out", n_sim, size, sim_Ps)
+    sim_S, sim_S_var = get_sim_array_result(sim_folder + f"/sim/{k_chi}/out/out", n_parallel*n_array, size, sim_Ps)
     S = np.append(S, sim_S)
     S_err = np.append(S_err, np.sqrt(sim_S_var))
     n_bis = res[str(k_chi) + "/n_bis"][()]
@@ -179,7 +182,7 @@ def continue_chi_step(parameters, k_chi):
         new_Ps = np.array([P_max])
         Ps = np.append(Ps, P_max)
         res.create_dataset(str(k_chi) + "/Ps", data=Ps)
-        sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, new_Ps, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc)
+        sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, new_Ps, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc)
         launch_bisection_step(sim_ids, sim_folder, k_chi, n + 1)
     else:
         edges = find_bis_edges(Ps, S, S_err, target_S, target_S_err, tol)
@@ -202,7 +205,7 @@ def continue_chi_step(parameters, k_chi):
             print("New Ps to simulate:")
             print(new_Ps)
             res.create_dataset(str(k_chi) + "/Ps", data=Ps)
-            sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, new_Ps, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc)
+            sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, new_Ps, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc)
             launch_bisection_step(sim_ids, sim_folder, k_chi, n + 1)
 
 """
@@ -228,7 +231,8 @@ def start_new_chi_step(parameters, k_chi):
     P_min = parameters["P_min"]
     n_steps = parameters["n_steps"]
     n_therm = parameters["n_therm"]
-    n_sim = parameters["n_sim"]
+    n_parallel = parameters["n_parallel"]
+    n_array = parameters["n_array"]
     n_bis = parameters["n_bis"]
     n_P_parallel = parameters["init_n_P_parallel"] - 2
     exec_loc = parameters["exec_loc"]
@@ -243,7 +247,7 @@ def start_new_chi_step(parameters, k_chi):
     print(Ps)
     print(Ps + chi)
     print(Ps - counter_chi_factor*chi)
-    sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc)
+    sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc)
     res.create_dataset(str(k_chi) + "/Ps", data=Ps)
     res.create_dataset(str(k_chi) + "/n_bis", data=n_bis)
     S = np.array([])
@@ -313,11 +317,11 @@ def launch_sym_step(prev_ids, sim_folder):
     s.set_command(command)
     s.run_batch()
 
-def launch_step_array(loc, size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc):
+def launch_step_array(loc, size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc):
     sim_ids = ""
     new_folder = True
     for i in range(len(Ps)):
-        sim_id = str(launch_array(loc, size, Ps[i], chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, 1 + i*n_sim, new_folder))
+        sim_id = str(launch_array(loc, size, Ps[i], chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, 1 + i*n_array, new_folder))
         if sim_id is not None:
             if sim_ids == "":
                 sim_ids = sim_id
@@ -327,13 +331,13 @@ def launch_step_array(loc, size, Ps, chi, n_steps, n_therm, counter_chi_factor, 
         new_folder = False
     return sim_ids
 
-def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim, exec_loc, array_start, new_folder):
+def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, array_start, new_folder):
     settings_loc = loc + "/settings" + str(array_start) + ".h5"
     create_settings_file(settings_loc, size, P, chi, n_steps, n_therm, counter_chi_factor)
     s = BatchScript()
     s.set_job_name("effborr-bisection")
     s.set_array_start(array_start)
-    s.set_array_end(array_start + n_sim - 1)
+    s.set_array_end(array_start + n_array - 1)
     out_loc = loc + "/out"
     print(out_loc)
     if new_folder is True:
@@ -353,8 +357,12 @@ def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_sim,
     s.set_run_time(estimate_run_time(n_steps, n_therm))
     s.set_verbose(True)
 
+    parallel_string = ""
+    for i in range(n_parallel):
+        parallel_string += f"{i} "
+
     out_loc += "/out"
-    command = exec_loc + " -s " + settings_loc + " -o " + out_loc + " --array"
+    command = "parallel " + exec_loc + " -s " + settings_loc + " -o " + out_loc + " --array --n_parallel " + n_parallel + " -r {1} ::: " + parallel_string
     s.set_command(command)
     return s.run_batch()
 

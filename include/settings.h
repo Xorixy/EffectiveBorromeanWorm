@@ -53,6 +53,7 @@ namespace settings {
         //Probably want to set it to false in the final code.
         inline bool replace_file = true;
         inline bool array = false;
+        inline int num_parallel = 1;
     }
 
     namespace log {

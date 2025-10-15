@@ -29,12 +29,35 @@ int cli::parse(int argc, char *argv[]) {
     app.add_option("-o, --filename"          , settings::io::filename     , "Path to the output file");
     app.add_option("-l, --loglevel"          , settings::log::level              , "Verbosity 0:high --> 6:off")->check(CLI::Range(0,6));
     app.add_flag("--array", settings::io::array, "If true, then saves output according to slurm task id");
+    app.add_option("--n_parallel", settings::io::num_parallel, "Number GNU parallel sims, used to determine the random seed");
     app.add_flag("--save_settings_no_run", save_settings_no_run, "Saves the sim settings given here to the file corresponding to settings_path. Does not run simulation. Overrides debug.");
     app.add_flag("--save_settings_run", save_settings, "Saves the sim settings given here to the file corresponding to settings_path.");
     app.add_flag("--debug"          , debug, "Enters debug mode with the settings from the settings file.");
 
     /* clang-format on */
     CLI11_PARSE(app, argc, argv);
+
+    if (settings::io::array) {
+        if (auto task_id = std::getenv("SLURM_ARRAY_TASK_ID") ; task_id != nullptr) {
+            auto old_seed = settings::random::seed;
+            settings::random::seed = settings::io::num_parallel*std::stoi(task_id) + settings::random::seed;
+            logger::log = spdlog::stdout_color_mt(fmt::format("EffBor [{}]", settings::random::seed), spdlog::color_mode::always);
+            logger::log->set_level(static_cast<spdlog::level::level_enum>(settings::log::level));
+            logger::log->info("SLURM_ARRAY_TASK_ID: {}", task_id);
+            logger::log->info("CLI Random: {}", old_seed);
+            logger::log->info("Number of parallel steps: {}", settings::io::num_parallel);
+            logger::log->info("Random seed: {}", settings::random::seed);
+            logger::log->info("Saving file as {}_{}.h5", settings::io::filename, task_id);
+            settings::io::filename += "_" + std::string(task_id) + ".h5";
+        } else {
+            logger::log = spdlog::stdout_color_mt(fmt::format("EffBor [{}]", settings::random::seed), spdlog::color_mode::always);
+            logger::log->set_level(static_cast<spdlog::level::level_enum>(settings::log::level));
+            logger::log->info("SLURM_ARRAY_TASK_ID not set");
+            logger::log->info("Random seed: {}", settings::random::seed);
+        }
+    }
+
+    logger::log->info("Loading settings... ");
 
     if (save_settings || save_settings_no_run) {
         io::save_settings();
@@ -55,17 +78,7 @@ int cli::parse(int argc, char *argv[]) {
     logger::print_params();
 
     if (debug) return 2;
-    if (settings::io::array) {
-        if (auto task_id = std::getenv("SLURM_ARRAY_TASK_ID") ; task_id != nullptr) {
-            logger::log->info("SLURM_ARRAY_TASK_ID: {}", task_id);
-            logger::log->info("Seeding random with task id.");
-            settings::random::seed = std::stoi(task_id);
-            logger::log->info("Saving file as {}_{}.h5", settings::io::filename, task_id);
-            settings::io::filename += "_" + std::string(task_id) + ".h5";
-        } else {
-            logger::log->info("SLURM_ARRAY_TASK_ID not set");
-        }
-    }
+
 
     rnd::seed(settings::random::seed);
 
