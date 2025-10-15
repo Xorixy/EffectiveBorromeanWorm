@@ -110,7 +110,7 @@ def sym_step():
     print("Opening res file...")
     res = try_load_h5(sim_folder + "/result.h5", "r+")
     print("Collecting sym data...")
-    S_mean, S_var = get_sim_result(sim_folder + "/sim/sym/out/out", n_array_sym, size, 0)
+    S_mean, S_var = get_sim_result(sim_folder + "/sim/sym/out/out", n_array_sym*n_parallel, size, 0)
     res.create_dataset("sym/S", data=S_mean)
     res.create_dataset("sym/S_err", data=np.sqrt(S_var))
     print("Done")
