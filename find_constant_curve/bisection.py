@@ -363,7 +363,7 @@ def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_para
         parallel_string += f"{i} "
 
     out_loc += "/out"
-    command = "parallel " + exec_loc + " -s " + settings_loc + " -o " + out_loc + " --array --n_parallel " + n_parallel + " -r {1} ::: " + parallel_string
+    command = "parallel " + exec_loc + " -s " + settings_loc + " -o " + out_loc + " --array --n_parallel " + str(n_parallel) + " -r {1} ::: " + parallel_string
     s.set_command(command)
     return s.run_batch()
 
