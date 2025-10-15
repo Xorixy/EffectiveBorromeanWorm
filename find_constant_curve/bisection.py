@@ -91,7 +91,7 @@ def start_bisection():
         res = try_load_h5(sim_folder + "/result.h5", "x")
         res.create_dataset("sym/P", data=P_sym)
         res.create_dataset("sym/size", data=size)
-        sym_id = launch_array(sim_folder + "/sim/sym", size, P_sym, 0, n_steps, n_therm, counter_chi_factor, n_parallel, n_array_sym, exec_loc, 1, True)
+        sym_id = launch_array(sim_folder + "/sim/sym", size, P_sym, 0, n_steps, n_therm, counter_chi_factor, n_parallel, n_array_sym, exec_loc, 0, True)
         launch_sym_step(sym_id, sim_folder)
     else:
         print("Launching chi steps")
