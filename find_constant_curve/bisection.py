@@ -93,6 +93,8 @@ def start_bisection():
         res.create_dataset("sym/size", data=size)
         sym_id = launch_array(sim_folder + "/sim/sym", size, P_sym, 0, n_steps, n_therm, counter_chi_factor, n_parallel, n_array_sym, exec_loc, 0, True)
         launch_sym_step(sym_id, sim_folder)
+        res.flush()
+        res.close()
     else:
         print("Launching chi steps")
         for i in range(len(old_chis), len(chis)):
@@ -118,6 +120,8 @@ def sym_step():
     chis = get_chi_list(p)
     for i in range(len(chis)):
         start_new_chi_step(p, i)
+    res.flush()
+    res.close()
 def bisection_step():
     print("Bisection step")
     p = try_load_json(args.sim_folder + "/params.json")
@@ -139,6 +143,8 @@ def bisection_step():
     else:
         print("Continuing bisection")
         continue_chi_step(p, k_chi)
+    res.flush()
+    res.close()
 
 def continue_chi_step(parameters, k_chi):
     n = args.n
@@ -154,15 +160,19 @@ def continue_chi_step(parameters, k_chi):
     counter_chi_factor = parameters["counter_chi_factor"]
     tol = parameters["tol"]
     res = try_load_h5(sim_folder + "/result.h5", "r+")
+    print(f"Running step for chi {k_chi}")
     Ps = res[str(k_chi) + "/Ps"][()]
     chis = get_chi_list(parameters)
     chi = chis[k_chi]
-    print(f"Running step for chi {k_chi}")
     target_S = res["sym/S"][()]
     target_S_err = res["sym/S_err"][()]
     Ps = res[str(k_chi) + "/Ps"][()]
     S = res[str(k_chi) + "/S"][()]
     S_err = res[str(k_chi) + "/S_err"][()]
+    print("Data found in res file:")
+    print("Ps : ", Ps)
+    print("S : ", S)
+    print("S_err : ", S_err)
     sim_Ps = Ps[len(S):]
     sim_S, sim_S_var = get_sim_array_result(sim_folder + f"/sim/{k_chi}/out/out", n_parallel*n_array, size, sim_Ps)
     S = np.append(S, sim_S)
@@ -213,6 +223,8 @@ def continue_chi_step(parameters, k_chi):
             res.create_dataset(str(k_chi) + "/Ps", data=Ps)
             sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, new_Ps, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc)
             launch_bisection_step(sim_ids, sim_folder, k_chi, n + 1)
+    res.flush()
+    res.close()
 
 """
     index_min, index_max = -1, -1
@@ -262,6 +274,8 @@ def start_new_chi_step(parameters, k_chi):
     res.create_dataset(str(k_chi) + "/S_err", data=S_err)
     res.create_dataset(str(k_chi) + "/chi", data=chi)
     launch_bisection_step(sim_ids, sim_folder, k_chi, 1)
+    res.flush()
+    res.close()
 
 def get_prev_k_chis(chis, k_chi):
     #This function returns the k_chis of the previous and previous-previous steps in the same chi direction as before.
