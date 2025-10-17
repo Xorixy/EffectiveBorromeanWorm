@@ -89,8 +89,9 @@ def start_bisection():
         n_parallel = p["n_parallel"]
         n_array_sym = p["n_array_sym"]
         res = try_load_h5(sim_folder + "/result.h5", "x")
-        res.create_dataset("sym/P", data=P_sym)
-        res.create_dataset("sym/size", data=size)
+        res.attrs["size"] = size
+        res.create_group("sym")
+        res["sym"].attrs["P"] = P_sym
         sym_id = launch_array(sim_folder + "/sim/sym", size, P_sym, 0, n_steps, n_therm, counter_chi_factor, n_parallel, n_array_sym, exec_loc, 0, True, 'sym')
         launch_sym_step(sym_id, sim_folder)
         res.flush()
@@ -113,8 +114,8 @@ def sym_step():
     res = try_load_h5(sim_folder + "/result.h5", "r+")
     print("Collecting sym data...")
     S_mean, S_var = get_sim_result(sim_folder + "/sim/sym/out/out", n_array_sym*n_parallel, size, 0)
-    res.create_dataset("sym/S", data=S_mean)
-    res.create_dataset("sym/S_err", data=np.sqrt(S_var))
+    res["sym"].attrs["S"] = S_mean
+    res["sym"].attrs["S"] = np.sqrt(S_var)
     print("Done")
     print("Launching bisection steps")
     chis = get_chi_list(p)
@@ -137,8 +138,8 @@ def bisection_step():
     if k_chi == -1:
         print("Collecting sym data")
         S_mean, S_var = get_sim_result(sim_folder + "/sim/sym/out/out", n_parallel*n_array_sym, size, 0)
-        res.create_dataset("sym/S", data=S_mean)
-        res.create_dataset("sym/S_err", data=np.sqrt(S_var))
+        res["sym"].attrs["S"] = S_mean
+        res["sym"].attrs["S"] = np.sqrt(S_var)
         print("Done")
     else:
         print("Continuing bisection")
@@ -161,72 +162,83 @@ def continue_chi_step(parameters, k_chi):
     tol = parameters["tol"]
     res = try_load_h5(sim_folder + "/result.h5", "r+")
     print(f"Running step for chi {k_chi}")
-    Ps = res[str(k_chi) + "/Ps"][()]
+    P = res[str(k_chi) + "/P"][()]
     chis = get_chi_list(parameters)
     chi = chis[k_chi]
-    target_S = res["sym/S"][()]
-    target_S_err = res["sym/S_err"][()]
-    Ps = res[str(k_chi) + "/Ps"][()]
-    S = res[str(k_chi) + "/S"][()]
-    S_err = res[str(k_chi) + "/S_err"][()]
+    target_S = res["sym"].attrs["S"]
+    target_S_err = res["sym"].attrs["S_err"]
+    n_P = res[str(k_chi)].attrs["n_P"]
+    n_S = res[str(k_chi)].attrs["n_S"]
+    n_bis = res[str(k_chi)].attrs["n_bis"]
+    P = res[str(k_chi) + "/P"][()][:n_P]
+    S = res[str(k_chi) + "/S"][()][:n_S]
+    S_err = res[str(k_chi) + "/S_err"][()][:n_S]
     print("Data found in res file:")
-    print("Ps : ", Ps)
+    print("P : ", P)
     print("S : ", S)
     print("S_err : ", S_err)
-    sim_Ps = Ps[len(S):]
-    sim_S, sim_S_var = get_sim_array_result(sim_folder + f"/sim/{k_chi}/out/out", n_parallel*n_array, size, sim_Ps)
+    sim_P = P[len(S):]
+    sim_S, sim_S_var = get_sim_array_result(sim_folder + f"/sim/{k_chi}/out/out", n_parallel*n_array, size, sim_P)
     S = np.append(S, sim_S)
     S_err = np.append(S_err, np.sqrt(sim_S_var))
-    n_bis = res[str(k_chi) + "/n_bis"][()]
-    del res[str(k_chi) + "/Ps"]
-    res.flush()
-    del res[str(k_chi) + "/S"]
-    res.flush()
-    del res[str(k_chi) + "/S_err"]
-    res.flush()
-    sort = Ps.argsort()
-    Ps = Ps[sort]
+    sort = P.argsort()
+    P = P[sort]
     S = S[sort]
     S_err = S_err[sort]
+    n_S = len(S)
+    if len(S) != len(S_err):
+        raise ValueError("Error : numer of S is not equal to number of S_err")
     print("Writing to file:")
     print("S : ", S)
-    res.create_dataset(str(k_chi) + "/S", data=S)
+    file_S = res[str(k_chi) + "/S"][...]
+    file_S[:n_S] = S
+    res[str(k_chi) + "/S"][...] = file_S
     res.flush()
     print("S_err : ", S_err)
-    res.create_dataset(str(k_chi) + "/S_err", data=S_err)
+    file_S_err = res[str(k_chi) + "/S_err"][...]
+    file_S_err[:n_S] = S_err
+    res[str(k_chi) + "/S_err"][...] = file_S_err
     res.flush()
-    if len(Ps) == 1:
+    if len(P) == 1:
         print("Only P_min simulated. Running step for P_max so that bisection can start")
         P_max = parameters["P_max"]
-        new_Ps = np.array([P_max])
-        Ps = np.append(Ps, P_max)
+        new_P = np.array([P_max])
+        P = np.append(P, P_max)
         print("Writing to file:")
-        print("Ps : ", Ps)
-        res.create_dataset(str(k_chi) + "/Ps", data=Ps)
-        sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, new_Ps, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, str(k_chi))
+        print("P : ", P)
+        res[str(k_chi)].attrs["n_P"] = len(P)
+        file_P = res[str(k_chi) + "/P"][...]
+        file_P[:n_P] = P
+        res[str(k_chi) + "/P"][...] = file_P
+        res.flush()
+        sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, new_P, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, str(k_chi))
         launch_bisection_step(sim_ids, sim_folder, k_chi, n + 1)
     else:
-        edges = find_bis_edges(Ps, S, S_err, target_S, target_S_err, tol)
+        edges = find_bis_edges(P, S, S_err, target_S, target_S_err, tol)
         if n_bis < n:
             print(f"All bisections done.\n{n - 1}/{n_bis} bisection steps performed in total.")
-            res.create_dataset(str(k_chi) + "/Ps", data=Ps)
+            res.create_dataset(str(k_chi) + "/P", data=P)
         elif len(edges) == 0:
             print(f"No edge found or bisection done to target precision.\n{n - 1}/{n_bis} bisection steps performed in total.")
-            res.create_dataset(str(k_chi) + "/Ps", data=Ps)
+            res.create_dataset(str(k_chi) + "/P", data=P)
         else:
             print(f'Target S : {target_S}')
             print(f"Following edges found:")
             for edge in edges:
-                print(f"(P = {Ps[edge[0]]}, S = {S[edge[0]]}), (P = {Ps[edge[1]]}, S = {S[edge[1]]})")
+                print(f"(P = {P[edge[0]]}, S = {S[edge[0]]}), (P = {P[edge[1]]}, S = {S[edge[1]]})")
             print(f"Launching new bisection step")
-            new_Ps = np.array([])
+            new_P = np.array([])
             for edge in edges:
-                new_Ps = np.append(new_Ps, get_Ps_step(Ps[edge[0]], Ps[edge[1]], n_P_parallel))
-            Ps = np.append(Ps, new_Ps)
-            print("New Ps to simulate:")
-            print(new_Ps)
-            res.create_dataset(str(k_chi) + "/Ps", data=Ps)
-            sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, new_Ps, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, str(k_chi))
+                new_P = np.append(new_P, get_P_step(P[edge[0]], P[edge[1]], n_P_parallel))
+            P = np.append(P, new_P)
+            print("New P to simulate:")
+            print(new_P)
+            res[str(k_chi)].attrs["n_P"] = len(P)
+            file_P = res[str(k_chi) + "/P"][...]
+            file_P[:n_P] = P
+            res[str(k_chi) + "/P"][...] = file_P
+            res.flush()
+            sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, new_P, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, str(k_chi))
             launch_bisection_step(sim_ids, sim_folder, k_chi, n + 1)
     res.flush()
     res.close()
@@ -264,24 +276,31 @@ def start_new_chi_step(parameters, k_chi):
     print(f"Starting bisection for chi {k_chi}")
     chis = get_chi_list(parameters)
     chi = chis[k_chi]
-    Ps = np.array([P_min])
+    P = np.array([P_min])
     if n_P_parallel >= 0:
-        Ps = get_Ps_init(P_min, P_max, n_P_parallel)
-    print(Ps)
-    print(Ps + chi)
-    print(Ps - counter_chi_factor*chi)
-    sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, str(k_chi))
-    res.create_dataset(str(k_chi) + "/Ps", data=Ps)
+        n_P_parallel = 1
+        P = get_P_init(P_min, P_max, n_P_parallel)
+    print(P)
+    print(P + chi)
+    print(P - counter_chi_factor*chi)
+    np_max = n_P_parallel + n_bis*parameters["n_P_parallel"]
+    sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, P, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, str(k_chi))
+    res.create_group(str(k_chi))
+    zeros = np.zeros(np_max)
+    res.create_dataset(str(k_chi) + "/P", data=zeros)
+    new_P = res[str(k_chi) + "/P"][()]
+    new_P[:len(P)] = P
+    res[str(k_chi) + "/P"][...] = new_P
+    res[str(k_chi)].attrs["n_P"] = len(P)
     res.flush()
-    res.create_dataset(str(k_chi) + "/n_bis", data=n_bis)
+    res[str(k_chi)].attrs["n_bis"] = n_bis
     res.flush()
-    S = np.array([])
-    S_err = np.array([])
-    res.create_dataset(str(k_chi) + "/S", data=S)
+    res.create_dataset(str(k_chi) + "/S", data=zeros)
+    res[str(k_chi)].attrs["n_S"] = 0
     res.flush()
-    res.create_dataset(str(k_chi) + "/S_err", data=S_err)
+    res.create_dataset(str(k_chi) + "/S_err", data=zeros)
     res.flush()
-    res.create_dataset(str(k_chi) + "/chi", data=chi)
+    res.attrs[str(k_chi) + "/chi"] = chi
     launch_bisection_step(sim_ids, sim_folder, k_chi, 1)
     res.flush()
     res.close()
@@ -312,11 +331,11 @@ def get_prev_k_chis(chis, k_chi):
 
     return prev_k_chi, prev_prev_k_chi
 
-def get_Ps_init(P_min, P_max , n_P_parallel):
+def get_P_init(P_min, P_max , n_P_parallel):
     return np.linspace(P_min, P_max, n_P_parallel + 2)
 
-def get_Ps_step(P_min, P_max, n_P_parallel):
-    return get_Ps_init(P_min, P_max, n_P_parallel)[1:-1]
+def get_P_step(P_min, P_max, n_P_parallel):
+    return get_P_init(P_min, P_max, n_P_parallel)[1:-1]
 
 def launch_bisection_step(prev_ids, sim_folder, k_chi, n):
     s = BatchScript()
@@ -346,11 +365,11 @@ def launch_sym_step(prev_ids, sim_folder):
     s.set_command(command)
     s.run_batch()
 
-def launch_step_array(loc, size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, name):
+def launch_step_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, name):
     sim_ids = ""
     new_folder = True
-    for i in range(len(Ps)):
-        sim_id = str(launch_array(loc, size, Ps[i], chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, i*n_array, new_folder, name))
+    for i in range(len(P)):
+        sim_id = str(launch_array(loc, size, P[i], chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, i*n_array, new_folder, name))
         if sim_id is not None:
             if sim_ids == "":
                 sim_ids = sim_id
@@ -413,10 +432,10 @@ def create_settings_file(settings_loc, size, P, chi, n_steps, n_therm, counter_c
         f["settings/save/annulus_size"] = np.float64(0.5)
         f["settings/save/save_interval"] = np.int32(1)
 
-def get_sim_array_result(outfile, n_sims, size, Ps):
-    S_means = np.zeros(len(Ps))
-    S_vars  = np.zeros(len(Ps))
-    for i in range(len(Ps)):
+def get_sim_array_result(outfile, n_sims, size, P):
+    S_means = np.zeros(len(P))
+    S_vars  = np.zeros(len(P))
+    for i in range(len(P)):
         S_mean, S_var = get_sim_result(outfile, n_sims, size, i*n_sims)
         S_means[i] = S_mean
         S_vars[i] = S_var
