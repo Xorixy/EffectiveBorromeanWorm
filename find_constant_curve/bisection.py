@@ -191,6 +191,7 @@ def continue_chi_step(parameters, k_chi):
     print("Writing to file:")
     print("S : ", S)
     file_S = res[str(k_chi) + "/S"][...]
+    file_S.attr["n_S"] = n_S
     file_S[:n_S] = S
     res[str(k_chi) + "/S"][...] = file_S
     res.flush()
@@ -206,7 +207,8 @@ def continue_chi_step(parameters, k_chi):
         P = np.append(P, P_max)
         print("Writing to file:")
         print("P : ", P)
-        res[str(k_chi)].attrs["n_P"] = len(P)
+        n_P = len(P)
+        res[str(k_chi)].attrs["n_P"] = n_P
         file_P = res[str(k_chi) + "/P"][...]
         file_P[:n_P] = P
         res[str(k_chi) + "/P"][...] = file_P
@@ -233,7 +235,8 @@ def continue_chi_step(parameters, k_chi):
             P = np.append(P, new_P)
             print("New P to simulate:")
             print(new_P)
-            res[str(k_chi)].attrs["n_P"] = len(P)
+            n_P = len(P)
+            res[str(k_chi)].attrs["n_P"] = n_P
             file_P = res[str(k_chi) + "/P"][...]
             file_P[:n_P] = P
             res[str(k_chi) + "/P"][...] = file_P
