@@ -191,7 +191,7 @@ def continue_chi_step(parameters, k_chi):
     print("Writing to file:")
     print("S : ", S)
     file_S = res[str(k_chi) + "/S"][...]
-    file_S.attr["n_S"] = n_S
+    res[str(k_chi)].attr["n_S"] = n_S
     file_S[:n_S] = S
     res[str(k_chi) + "/S"][...] = file_S
     res.flush()
