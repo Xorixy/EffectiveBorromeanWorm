@@ -219,10 +219,8 @@ def continue_chi_step(parameters, k_chi):
         edges = find_bis_edges(P, S, S_err, target_S, target_S_err, tol)
         if n_bis < n:
             print(f"All bisections done.\n{n - 1}/{n_bis} bisection steps performed in total.")
-            res.create_dataset(str(k_chi) + "/P", data=P)
         elif len(edges) == 0:
             print(f"No edge found or bisection done to target precision.\n{n - 1}/{n_bis} bisection steps performed in total.")
-            res.create_dataset(str(k_chi) + "/P", data=P)
         else:
             print(f'Target S : {target_S}')
             print(f"Following edges found:")
