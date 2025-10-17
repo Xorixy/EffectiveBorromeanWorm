@@ -115,7 +115,7 @@ def sym_step():
     print("Collecting sym data...")
     S_mean, S_var = get_sim_result(sim_folder + "/sim/sym/out/out", n_array_sym*n_parallel, size, 0)
     res["sym"].attrs["S"] = S_mean
-    res["sym"].attrs["S"] = np.sqrt(S_var)
+    res["sym"].attrs["S_err"] = np.sqrt(S_var)
     print("Done")
     print("Launching bisection steps")
     chis = get_chi_list(p)
