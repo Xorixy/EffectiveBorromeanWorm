@@ -91,7 +91,7 @@ def start_bisection():
         res = try_load_h5(sim_folder + "/result.h5", "x")
         res.create_dataset("sym/P", data=P_sym)
         res.create_dataset("sym/size", data=size)
-        sym_id = launch_array(sim_folder + "/sim/sym", size, P_sym, 0, n_steps, n_therm, counter_chi_factor, n_parallel, n_array_sym, exec_loc, 0, True)
+        sym_id = launch_array(sim_folder + "/sim/sym", size, P_sym, 0, n_steps, n_therm, counter_chi_factor, n_parallel, n_array_sym, exec_loc, 0, True, 'sym')
         launch_sym_step(sym_id, sim_folder)
         res.flush()
         res.close()
@@ -198,7 +198,7 @@ def continue_chi_step(parameters, k_chi):
         print("Writing to file:")
         print("Ps : ", Ps)
         res.create_dataset(str(k_chi) + "/Ps", data=Ps)
-        sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, new_Ps, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc)
+        sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, new_Ps, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, str(k_chi))
         launch_bisection_step(sim_ids, sim_folder, k_chi, n + 1)
     else:
         edges = find_bis_edges(Ps, S, S_err, target_S, target_S_err, tol)
@@ -221,7 +221,7 @@ def continue_chi_step(parameters, k_chi):
             print("New Ps to simulate:")
             print(new_Ps)
             res.create_dataset(str(k_chi) + "/Ps", data=Ps)
-            sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, new_Ps, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc)
+            sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, new_Ps, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, str(k_chi))
             launch_bisection_step(sim_ids, sim_folder, k_chi, n + 1)
     res.flush()
     res.close()
@@ -265,7 +265,7 @@ def start_new_chi_step(parameters, k_chi):
     print(Ps)
     print(Ps + chi)
     print(Ps - counter_chi_factor*chi)
-    sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc)
+    sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, str(k_chi))
     res.create_dataset(str(k_chi) + "/Ps", data=Ps)
     res.create_dataset(str(k_chi) + "/n_bis", data=n_bis)
     S = np.array([])
@@ -311,7 +311,7 @@ def get_Ps_step(P_min, P_max, n_P_parallel):
 
 def launch_bisection_step(prev_ids, sim_folder, k_chi, n):
     s = BatchScript()
-    s.set_job_name("effborr-bisection-step")
+    s.set_job_name(f"effborr-bisection-step-{k_chi}")
     s.set_output_name(sim_folder)
     s.set_run_time(3600)
     s.set_verbose(True)
@@ -337,11 +337,11 @@ def launch_sym_step(prev_ids, sim_folder):
     s.set_command(command)
     s.run_batch()
 
-def launch_step_array(loc, size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc):
+def launch_step_array(loc, size, Ps, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, name):
     sim_ids = ""
     new_folder = True
     for i in range(len(Ps)):
-        sim_id = str(launch_array(loc, size, Ps[i], chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, i*n_array, new_folder))
+        sim_id = str(launch_array(loc, size, Ps[i], chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, i*n_array, new_folder, name))
         if sim_id is not None:
             if sim_ids == "":
                 sim_ids = sim_id
@@ -351,11 +351,11 @@ def launch_step_array(loc, size, Ps, chi, n_steps, n_therm, counter_chi_factor, 
         new_folder = False
     return sim_ids
 
-def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, array_start, new_folder):
+def launch_array(loc, size, P, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, array_start, new_folder, name):
     settings_loc = loc + "/settings" + str(array_start) + ".h5"
     create_settings_file(settings_loc, size, P, chi, n_steps, n_therm, counter_chi_factor)
     s = BatchScript()
-    s.set_job_name("effborr-bisection")
+    s.set_job_name(f"effborr-bisection-{name}")
     s.set_array_start(array_start)
     s.set_array_end(array_start + n_array - 1)
     out_loc = loc + "/out"
