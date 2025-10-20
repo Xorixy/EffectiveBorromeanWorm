@@ -304,7 +304,7 @@ def start_new_chi_step(parameters, k_chi):
     print(P)
     print(P + chi)
     print(P - counter_chi_factor*chi)
-    np_max = n_P_parallel + (n_P_parallel == 1) + n_bis*parameters["n_P_parallel"]
+    np_max = n_P_parallel + (n_P_parallel == 1) + (n_bis+1)*parameters["n_P_parallel"]
     print("np_max : ", np_max)
     sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, P, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, str(k_chi))
     res = try_load_h5(sim_folder + f"/result_{k_chi}.h5", "x")
