@@ -289,7 +289,7 @@ def start_new_chi_step(parameters, k_chi):
     n_parallel = parameters["n_parallel"]
     n_array = parameters["n_array"]
     n_bis = parameters["n_bis"]
-    n_P_parallel = parameters["init_n_P_parallel"] - 2
+    n_P_parallel = parameters["init_n_P_parallel"]
     exec_loc = parameters["exec_loc"]
     counter_chi_factor = parameters["counter_chi_factor"]
     sym = try_load_h5(sim_folder + "/result.h5", "r+")
@@ -298,9 +298,10 @@ def start_new_chi_step(parameters, k_chi):
     chis = get_chi_list(parameters)
     chi = chis[k_chi]
     P = np.array([P_min])
-    if n_P_parallel <= 0:
+    if n_P_parallel >= 2:
+        P = get_P_init(P_min, P_max, n_P_parallel - 2)
+    else:
         n_P_parallel = 1
-        P = get_P_init(P_min, P_max, n_P_parallel)
     print(P)
     print(P + chi)
     print(P - counter_chi_factor*chi)
