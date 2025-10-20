@@ -162,7 +162,6 @@ def continue_chi_step(parameters, k_chi):
     tol = parameters["tol"]
     res = try_load_h5(sim_folder + "/result.h5", "r+")
     print(f"Running step for chi {k_chi}")
-    P = res[str(k_chi) + "/P"][()]
     chis = get_chi_list(parameters)
     chi = chis[k_chi]
     target_S = res["sym"].attrs["S"]
@@ -195,6 +194,7 @@ def continue_chi_step(parameters, k_chi):
     print("n_S :", n_S)
     file_S = res[str(k_chi) + "/S"][...]
     res[str(k_chi)].attrs["n_S"] = n_S
+    res.flush()
     file_S[:n_S] = S
     res[str(k_chi) + "/S"][...] = file_S
     res.flush()
@@ -210,9 +210,10 @@ def continue_chi_step(parameters, k_chi):
         P = np.append(P, P_max)
         print("Writing to file:")
         print("P : ", P)
-        print("n_P : ", n_P)
         n_P = len(P)
+        print("n_P : ", n_P)
         res[str(k_chi)].attrs["n_P"] = n_P
+        res.flush()
         file_P = res[str(k_chi) + "/P"][...]
         file_P[:n_P] = P
         res[str(k_chi) + "/P"][...] = file_P
@@ -240,6 +241,7 @@ def continue_chi_step(parameters, k_chi):
             print(P)
             n_P = len(P)
             res[str(k_chi)].attrs["n_P"] = n_P
+            res.flush()
             print(n_P)
             file_P = res[str(k_chi) + "/P"][...]
             print("len(file_P) : ")
@@ -295,23 +297,27 @@ def start_new_chi_step(parameters, k_chi):
     np_max = n_P_parallel + (n_P_parallel == 1) + n_bis*parameters["n_P_parallel"]
     sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, P, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, str(k_chi))
     res.create_group(str(k_chi))
+    res.flush()
     zeros = np.zeros(np_max)
     res.create_dataset(str(k_chi) + "/P", data=zeros)
+    res.flush()
     new_P = res[str(k_chi) + "/P"][()]
     new_P[:len(P)] = P
     res[str(k_chi) + "/P"][...] = new_P
+    res.flush()
     res[str(k_chi)].attrs["n_P"] = len(P)
     res.flush()
     res[str(k_chi)].attrs["n_bis"] = n_bis
     res.flush()
     res.create_dataset(str(k_chi) + "/S", data=zeros)
+    res.flush()
     res[str(k_chi)].attrs["n_S"] = 0
     res.flush()
     res.create_dataset(str(k_chi) + "/S_err", data=zeros)
     res.flush()
     res[str(k_chi)].attrs["chi"] = chi
-    launch_bisection_step(sim_ids, sim_folder, k_chi, 1)
     res.flush()
+    launch_bisection_step(sim_ids, sim_folder, k_chi, 1)
     res.close()
 
 def get_prev_k_chis(chis, k_chi):
