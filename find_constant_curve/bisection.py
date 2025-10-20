@@ -256,7 +256,7 @@ def continue_chi_step(parameters, k_chi):
     res.flush()
     if finished:
         sym = try_load_h5(sim_folder + "/result.h5", "r+")
-        res.copy(res[str(k_chi)], sym[str(k_chi)])
+        res.copy(res[str(k_chi)], sym, str(k_chi))
         sym.flush()
         sym.close()
     res.close()
