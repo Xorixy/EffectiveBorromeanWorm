@@ -239,9 +239,10 @@ def continue_chi_step(parameters, k_chi):
             print(new_P)
             print(P)
             res[str(k_chi)].attrs["n_P"] = n_P
+            print(n_P)
             file_P = res[str(k_chi) + "/P"][...]
-            print("file_P : ")
-            print(file_P)
+            print("len(file_P) : ")
+            print(len(file_P))
             file_P[:n_P] = P
             res[str(k_chi) + "/P"][...] = file_P
             res.flush()
