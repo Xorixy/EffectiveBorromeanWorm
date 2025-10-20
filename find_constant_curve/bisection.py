@@ -535,7 +535,7 @@ def try_load_h5(filename, access):
             f = h5.File(filename, access)
             return f
         except Exception as e:
-            t_wait = 5
+            t_wait = 60
             print(f"Cannot open file, error {e}.\nWaiting {t_wait}s...")
             time.sleep(t_wait)
             max_tries -= 1
