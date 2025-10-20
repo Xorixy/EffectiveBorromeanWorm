@@ -160,12 +160,11 @@ def continue_chi_step(parameters, k_chi):
     exec_loc = parameters["exec_loc"]
     counter_chi_factor = parameters["counter_chi_factor"]
     tol = parameters["tol"]
-    res = try_load_h5(sim_folder + "/result.h5", "r+")
+    res = try_load_h5(sim_folder + f"/result_{k_chi}.h5", "r+")
     print(f"Running step for chi {k_chi}")
     chis = get_chi_list(parameters)
     chi = chis[k_chi]
     target_S = res["sym"].attrs["S"]
-    target_S_err = res["sym"].attrs["S_err"]
     n_P = res[str(k_chi)].attrs["n_P"]
     n_S = res[str(k_chi)].attrs["n_S"]
     n_bis = res[str(k_chi)].attrs["n_bis"]
@@ -203,6 +202,7 @@ def continue_chi_step(parameters, k_chi):
     file_S_err[:n_S] = S_err
     res[str(k_chi) + "/S_err"][...] = file_S_err
     res.flush()
+    finished = False
     if len(P) == 1:
         print("Only P_min simulated. Running step for P_max so that bisection can start")
         P_max = parameters["P_max"]
@@ -221,11 +221,13 @@ def continue_chi_step(parameters, k_chi):
         sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, new_P, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, str(k_chi))
         launch_bisection_step(sim_ids, sim_folder, k_chi, n + 1)
     else:
-        edges = find_bis_edges(P, S, S_err, target_S, target_S_err, tol)
+        edges = find_bis_edges(P, S, S_err, target_S, 0, tol)
         if n_bis < n:
             print(f"All bisections done.\n{n - 1}/{n_bis} bisection steps performed in total.")
+            finished = True
         elif len(edges) == 0:
             print(f"No edge found or bisection done to target precision.\n{n - 1}/{n_bis} bisection steps performed in total.")
+            finished = True
         else:
             print(f'Target S : {target_S}')
             print(f"Following edges found:")
@@ -252,7 +254,14 @@ def continue_chi_step(parameters, k_chi):
             sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, new_P, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, str(k_chi))
             launch_bisection_step(sim_ids, sim_folder, k_chi, n + 1)
     res.flush()
+    if finished:
+        sym = try_load_h5(sim_folder + "/result.h5", "r+")
+        res.copy(res[str(k_chi)], sym[str(k_chi)])
+        sym.flush()
+        sym.close()
     res.close()
+
+
 
 """
     index_min, index_max = -1, -1
@@ -283,7 +292,8 @@ def start_new_chi_step(parameters, k_chi):
     n_P_parallel = parameters["init_n_P_parallel"] - 2
     exec_loc = parameters["exec_loc"]
     counter_chi_factor = parameters["counter_chi_factor"]
-    res = try_load_h5(sim_folder + "/result.h5", "r+")
+    sym = try_load_h5(sim_folder + "/result.h5", "r+")
+    target_S = sym["sym"].attrs["S"]
     print(f"Starting bisection for chi {k_chi}")
     chis = get_chi_list(parameters)
     chi = chis[k_chi]
@@ -296,6 +306,9 @@ def start_new_chi_step(parameters, k_chi):
     print(P - counter_chi_factor*chi)
     np_max = n_P_parallel + (n_P_parallel == 1) + n_bis*parameters["n_P_parallel"]
     sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, P, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, str(k_chi))
+    res = try_load_h5(sim_folder + f"/result_{k_chi}.h5", "x")
+    res.create_group("sym")
+    res["sym"].attrs["S"] = target_S
     res.create_group(str(k_chi))
     res.flush()
     zeros = np.zeros(np_max)
@@ -519,8 +532,9 @@ def try_load_h5(filename, access):
             f = h5.File(filename, access)
             return f
         except Exception as e:
-            print(f"Cannot open file, error {e}.\nWaiting 5s...")
-            time.sleep(5)
+            t_wait = 5
+            print(f"Cannot open file, error {e}.\nWaiting {t_wait}s...")
+            time.sleep(t_wait)
             max_tries -= 1
     raise Exception("Error. Could not open file " + filename)
 
