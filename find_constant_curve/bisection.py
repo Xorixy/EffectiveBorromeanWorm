@@ -238,6 +238,7 @@ def continue_chi_step(parameters, k_chi):
             print("New P to simulate:")
             print(new_P)
             print(P)
+            n_P = len(P)
             res[str(k_chi)].attrs["n_P"] = n_P
             print(n_P)
             file_P = res[str(k_chi) + "/P"][...]
