@@ -298,7 +298,7 @@ def start_new_chi_step(parameters, k_chi):
     chis = get_chi_list(parameters)
     chi = chis[k_chi]
     P = np.array([P_min])
-    if n_P_parallel >= 0:
+    if n_P_parallel <= 0:
         n_P_parallel = 1
         P = get_P_init(P_min, P_max, n_P_parallel)
     print(P)
