@@ -18,7 +18,7 @@ def get_S(single_stiffness, double_stiffness):
     S = 8*v**2 + 5*w**2 - 4*v*w
     return S
 def estimate_run_time(n_steps, n_therm):
-    return int(2*(n_steps + n_therm)/(10 ** 7)) + 10
+    return int(3*(n_steps + n_therm)/(10 ** 7)) + 20
 
 def is_valid_distance(s1, s2, err1, err2, tol_factor):
     return np.abs(s1 - s2) > tol_factor*(err1 + err2)
@@ -304,7 +304,7 @@ def start_new_chi_step(parameters, k_chi):
     print(P)
     print(P + chi)
     print(P - counter_chi_factor*chi)
-    np_max = n_P_parallel + (n_P_parallel == 1) + (n_bis+1)*parameters["n_P_parallel"]
+    np_max = n_P_parallel + (n_P_parallel == 1) + (n_bis+2)*parameters["n_P_parallel"]
     print("np_max : ", np_max)
     sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, P, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, str(k_chi))
     res = try_load_h5(sim_folder + f"/result_{k_chi}.h5", "x")
