@@ -177,6 +177,8 @@ def continue_chi_step(parameters, k_chi):
     print("P : ", P)
     print("S : ", S)
     print("S_err : ", S_err)
+    print("n_P : ", n_P)
+    print("n_S : ", n_S)
     sim_P = P[len(S):]
     sim_S, sim_S_var = get_sim_array_result(sim_folder + f"/sim/{k_chi}/out/out", n_parallel*n_array, size, sim_P)
     S = np.append(S, sim_S)
@@ -190,6 +192,7 @@ def continue_chi_step(parameters, k_chi):
         raise ValueError("Error : numer of S is not equal to number of S_err")
     print("Writing to file:")
     print("S : ", S)
+    print("n_S :", n_S)
     file_S = res[str(k_chi) + "/S"][...]
     res[str(k_chi)].attrs["n_S"] = n_S
     file_S[:n_S] = S
@@ -207,6 +210,7 @@ def continue_chi_step(parameters, k_chi):
         P = np.append(P, P_max)
         print("Writing to file:")
         print("P : ", P)
+        print("n_P : ", n_P)
         n_P = len(P)
         res[str(k_chi)].attrs["n_P"] = n_P
         file_P = res[str(k_chi) + "/P"][...]
