@@ -233,7 +233,7 @@ def continue_chi_step(parameters, k_chi):
             P = np.append(P, new_P)
             print("New P to simulate:")
             print(new_P)
-            n_P = len(P)
+            print(P)
             res[str(k_chi)].attrs["n_P"] = n_P
             file_P = res[str(k_chi) + "/P"][...]
             file_P[:n_P] = P
@@ -284,7 +284,7 @@ def start_new_chi_step(parameters, k_chi):
     print(P)
     print(P + chi)
     print(P - counter_chi_factor*chi)
-    np_max = n_P_parallel + n_bis*parameters["n_P_parallel"]
+    np_max = n_P_parallel + (n_P_parallel == 1) + n_bis*parameters["n_P_parallel"]
     sim_ids = launch_step_array(sim_folder + f"/sim/{k_chi}", size, P, chi, n_steps, n_therm, counter_chi_factor, n_parallel, n_array, exec_loc, str(k_chi))
     res.create_group(str(k_chi))
     zeros = np.zeros(np_max)
@@ -301,7 +301,7 @@ def start_new_chi_step(parameters, k_chi):
     res.flush()
     res.create_dataset(str(k_chi) + "/S_err", data=zeros)
     res.flush()
-    res.attrs[str(k_chi) + "/chi"] = chi
+    res[str(k_chi)].attrs["chi"] = chi
     launch_bisection_step(sim_ids, sim_folder, k_chi, 1)
     res.flush()
     res.close()
