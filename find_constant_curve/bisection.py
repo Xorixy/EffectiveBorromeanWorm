@@ -178,7 +178,12 @@ def continue_chi_step(parameters, k_chi):
     print("n_P : ", n_P)
     print("n_S : ", n_S)
     sim_P = P[len(S):]
-    sim_S, sim_S_var = get_sim_array_result(sim_folder + f"/sim/{k_chi}/out/out", n_parallel*n_array, size, sim_P)
+    print("Loading sim result...")
+    print("n_parallel : ", n_parallel)
+    print("n_array : ", n_array)
+    n_sim = n_parallel*n_array
+    print("n_sim : ", n_sim)
+    sim_S, sim_S_var = get_sim_array_result(sim_folder + f"/sim/{k_chi}/out/out", n_sim, size, sim_P)
     S = np.append(S, sim_S)
     S_err = np.append(S_err, np.sqrt(sim_S_var))
     sort = P.argsort()
