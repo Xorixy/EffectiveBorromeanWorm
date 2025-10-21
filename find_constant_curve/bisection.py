@@ -474,24 +474,27 @@ def get_sim_array_result(outfile, n_sims, size, P):
     return S_means, S_vars
 
 def get_sim_result(outfile, n_sims, size, array_start):
-    part_f = np.zeros(n_sims)
-    windings_diff_s_x = np.zeros(n_sims)
-    windings_diff_s_y = np.zeros(n_sims)
-    windings_sum_s_x = np.zeros(n_sims)
-    windings_sum_s_y = np.zeros(n_sims)
+    part_f = np.array([])
+    windings_diff_s_x = np.array([])
+    windings_diff_s_y = np.array([])
+    windings_sum_s_x = np.array([])
+    windings_sum_s_y = np.array([])
     for i in range(n_sims):
         file_path = outfile + "_" + str(i + array_start) + ".h5"
-        with h5.File(file_path, "r") as sim_file:
-            base = int(sim_file['/constants/base_minus_one'][()]) + 1
-            part_f[i] = int(sim_file['/data/partition_function'][()])
-            windings_diff_s_x[i] = (int(sim_file['/data/windings_diff_squared_x/big'][()]) * base +
-                                    int(sim_file['/data/windings_diff_squared_x/small'][()]))
-            windings_sum_s_x[i] = (int(sim_file['/data/windings_sum_squared_x/big'][()]) * base +
-                                   int(sim_file['/data/windings_sum_squared_x/small'][()]))
-            windings_diff_s_y[i] = (int(sim_file['/data/windings_diff_squared_y/big'][()]) * base +
-                                    int(sim_file['/data/windings_diff_squared_y/small'][()]))
-            windings_sum_s_y[i] = (int(sim_file['/data/windings_sum_squared_y/big'][()]) * base +
-                                   int(sim_file['/data/windings_sum_squared_y/small'][()]))
+        try:
+            with h5.File(file_path, "r") as sim_file:
+                base = int(sim_file['/constants/base_minus_one'][()]) + 1
+                part_f = np.append(part_f, int(sim_file['/data/partition_function'][()]))
+                windings_diff_s_x = np.append(windings_diff_s_x, (int(sim_file['/data/windings_diff_squared_x/big'][()]) * base +
+                                        int(sim_file['/data/windings_diff_squared_x/small'][()])))
+                windings_sum_s_x = np.append(windings_sum_s_x, (int(sim_file['/data/windings_sum_squared_x/big'][()]) * base +
+                                       int(sim_file['/data/windings_sum_squared_x/small'][()])))
+                windings_diff_s_y = np.append(windings_diff_s_y, (int(sim_file['/data/windings_diff_squared_y/big'][()]) * base +
+                                        int(sim_file['/data/windings_diff_squared_y/small'][()])))
+                windings_sum_s_y = np.append(windings_sum_s_y, (int(sim_file['/data/windings_sum_squared_y/big'][()]) * base +
+                                       int(sim_file['/data/windings_sum_squared_y/small'][()])))
+        except Exception as e:
+            print(f"WARNING : Could not read result from file {file_path}, received error ", e)
     lambda_diff_x = windings_diff_s_x / (part_f * size ** 2)
     lambda_sum_x = windings_sum_s_x / (part_f * size ** 2)
     lambda_diff_y = windings_diff_s_y / (part_f * size ** 2)
