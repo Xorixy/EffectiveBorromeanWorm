@@ -88,11 +88,19 @@ def start_bisection():
         print("Launching sym step")
         n_parallel = p["n_parallel"]
         n_array_sym = p["n_array_sym"]
+        try:
+            chi_sym = p["chi_sym"]
+        except Exception as e:
+            chi_sym = None
         res = try_load_h5(sim_folder + "/result.h5", "x")
         res.attrs["size"] = size
         res.create_group("sym")
         res["sym"].attrs["P"] = P_sym
-        sym_id = launch_array(sim_folder + "/sim/sym", size, P_sym, 0, n_steps, n_therm, counter_chi_factor, n_parallel, n_array_sym, exec_loc, 0, True, 'sym')
+        if chi_sym is not None:
+            res["sym"].attrs["chi"] = chi_sym
+        else:
+            chi_sym = 0.0
+        sym_id = launch_array(sim_folder + "/sim/sym", size, P_sym, chi_sym, n_steps, n_therm, counter_chi_factor, n_parallel, n_array_sym, exec_loc, 0, True, 'sym')
         launch_sym_step(sym_id, sim_folder)
         res.flush()
         res.close()
@@ -260,11 +268,19 @@ def continue_chi_step(parameters, k_chi):
             launch_bisection_step(sim_ids, sim_folder, k_chi, n + 1)
     res.flush()
     if finished:
+        print("Merging results into file...")
         sym = try_load_h5(sim_folder + "/result.h5", "r+")
         res.copy(res[str(k_chi)], sym, str(k_chi))
         sym.flush()
         sym.close()
-    res.close()
+        n_keys = len(res.keys())
+        res.close()
+        if n_keys == len(chis) + 1:
+            print("All chis done. Running a final merge step for stability...")
+            merge_results(sim_folder)
+        print("Done")
+    else:
+        res.close()
 
 
 
@@ -549,6 +565,33 @@ def try_load_h5(filename, access):
             time.sleep(t_wait)
             max_tries -= 1
     raise Exception("Error. Could not open file " + filename)
+
+def merge_results(folder):
+    filenames = os.listdir(folder)
+    result_names = []
+    has_result_sym = False
+    for name in filenames:
+        if name == "result_sym.h5":
+            has_result_sym = True
+        if name[0:7] == "result_":
+            result_names.append(name)
+    if not has_result_sym:
+        os.rename("result.h5", "result_sym.h5")
+        result_names.append("result_sym.h5")
+
+    f = h5.File("result.h5", "w")
+    for name in result_names:
+        print("Opening file ", name)
+        r = h5.File(name, "r")
+        if len(r.keys()) == 2:
+            for key in r:
+                if key != "sym":
+                    print("Copying key ", key)
+                    r.copy(r[key], f, key)
+        else:
+            key = "sym"
+            print("Copying key ", key)
+            r.copy(r[key], f, key)
 
 parser = argparse.ArgumentParser(description = "Bisection find constant curve")
 subparsers = parser.add_subparsers(help="Sub-command help", required = True)

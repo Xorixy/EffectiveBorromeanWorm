@@ -2,6 +2,7 @@
   "P_max": 0.5,
   "P_min": 0.45,
   "P_sym": 0.4716,
+  "chi_sym" : 0.0,
   "chi_max": 0.05,
   "chi_min": -0.05,
   "chis" : [],
