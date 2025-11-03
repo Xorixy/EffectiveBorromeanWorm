@@ -117,7 +117,8 @@ class BatchScript:
                 print(out.stderr.decode())
             out = out.stdout.decode()
             if out[0:20] != "Submitted batch job ":
-                print("Unexpected string")
+                print("Unexpected string:")
+                print(out)
                 out = None
             else:
                 out = int(out[20:])
