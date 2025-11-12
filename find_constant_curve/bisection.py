@@ -105,8 +105,15 @@ def start_bisection():
         res.flush()
         res.close()
     else:
+        res = try_load_h5(sim_folder + "/result.h5", "x")
+        res.attrs["size"] = size
+        res.create_group("sym")
+        res["sym"].attrs["P"] = 1.0
+        res["sym"].attrs["chi"] = 1.0
+        res["sym"].attrs["S"] = 1.0
+        res["sym"].attrs["S_err"] = 1.0
         print("Launching chi steps")
-        for i in range(len(old_chis), len(chis)):
+        for i in range(len(chis)):
             start_new_chi_step(p, i)
 
 
