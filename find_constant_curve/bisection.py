@@ -84,7 +84,7 @@ def start_bisection():
     n_therm = p["n_therm"]
     counter_chi_factor = p["counter_chi_factor"]
     print(f"Estimated runtime : {estimate_run_time(n_steps, n_therm)}s")
-    if not args.cont:
+    if not args.direct:
         print("Launching sym step")
         n_parallel = p["n_parallel"]
         n_array_sym = p["n_array_sym"]
@@ -611,6 +611,7 @@ sym_parser.set_defaults(func = sym_step)
 
 start_parser.add_argument("-p", "--parameters", help="Path to parameter file", required = True)
 start_parser.add_argument("--cont", action="store_true", help="If this flag is given then we continue a previous bisection with new chis")
+start_parser.add_argument("--direct", action="store_true", help="If this flag is given then we continue a previous bisection with new chis")
 step_parser.add_argument("--sim_folder", help="Path to the sim folder", required = True)
 step_parser.add_argument("--k_chi", type=int, help="Which chi id the step corresponds to", required=True)
 step_parser.add_argument("-n", type=int, help = "How many steps we are on", default = 0)
